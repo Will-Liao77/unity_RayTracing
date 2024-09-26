@@ -539,7 +539,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14c4bc3fb7ee44542be4c5649175f635, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RayTracingShader: {fileID: 7200000, guid: 2756b4043a490094d8beae4f45368044, type: 3}
+  RayTracingShader: {fileID: 7200000, guid: 9224a913b5217724b8bb02bb458f0b18, type: 3}
 --- !u!1 &1518342993
 GameObject:
   m_ObjectHideFlags: 0

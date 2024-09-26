@@ -6,6 +6,7 @@ using SimpleFileBrowser;
 
 public class ObjFileBrowser : MonoBehaviour
 {
+    //private bool objLoaded = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -19,6 +20,11 @@ public class ObjFileBrowser : MonoBehaviour
     {
 
     }
+
+    //public bool CheckObjLoadStatus()
+    //{
+    //    return objLoaded;
+    //}
 
     public void ButtonClick()
     {
@@ -34,6 +40,8 @@ public class ObjFileBrowser : MonoBehaviour
             // Debug.Log("Selected file: " + FileBrowser.Result);
             // LoadObj(FileBrowser.Result);
             OnFilesSelected(FileBrowser.Result);
+
+            //objLoaded = true;
         }
     }
 
