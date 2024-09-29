@@ -17,17 +17,29 @@ public class RayTracingMaster : MonoBehaviour
     private static List<MeshObject> _meshObjects = new List<MeshObject>();
     private static List<Vector3> _vertices = new List<Vector3>();
     private static List<int> _indices = new List<int>();
-    private ComputeBuffer _meshObjectBuffer;
-    private ComputeBuffer _vertexBuffer;
-    private ComputeBuffer _indexBuffer;
+    private ComputeBuffer _MeshObjectBuffer;
+    private ComputeBuffer _VerticesBuffer;
+    private ComputeBuffer _IndicesBuffer;
+    private CommandBuffer _command;
 
     struct MeshObject
     {
         public Matrix4x4 localToWorldMatrix;
         public int indices_offset;
         public int indices_count;
+        public Vector4 albedo;
     }
 
+    private void Start()
+    {
+        if (RayTracingShader == null)
+        {
+            Debug.LogError("no computer shader load");
+        }
+
+        _command = new CommandBuffer();
+        _command.name = "Ray Tracing";
+    }
     private void Awake()
     {
         _camera = GetComponent<Camera>();
@@ -35,9 +47,10 @@ public class RayTracingMaster : MonoBehaviour
 
     private void OnDisable()
     {
-        _meshObjectBuffer.Release();
-        _vertexBuffer.Release();
-        _indexBuffer.Release();
+        // ? is a null-conditional operator
+        _MeshObjectBuffer?.Release();
+        _VerticesBuffer?.Release();
+        _IndicesBuffer?.Release();
     }
 
     // set parameters to compute shader
@@ -48,14 +61,9 @@ public class RayTracingMaster : MonoBehaviour
         RayTracingShader.SetMatrix("_CameraInverseProjection", _camera.projectionMatrix.inverse);
 
         // set mesh data to compute shader
-        if (_meshObjectBuffer != null)
-            SetComputeBuffer("_MeshObjectBuffer", _meshObjectBuffer);
-
-        if (_vertexBuffer != null)
-            SetComputeBuffer("_VertexBuffer", _vertexBuffer);
-
-        if (_indexBuffer != null)
-            SetComputeBuffer("_IndexBuffer", _indexBuffer);
+        SetComputeBuffer("_MeshObjectBuffer", _MeshObjectBuffer);
+        SetComputeBuffer("_VerticesBuffer", _VerticesBuffer);
+        SetComputeBuffer("_IndicesBuffer", _IndicesBuffer);
     }
 
     public static void RegisterObject(RayTracingObject obj)
@@ -69,6 +77,7 @@ public class RayTracingMaster : MonoBehaviour
         _meshObjectsNeedRebuilding = true;
     }
 
+    // Rebuild the mesh object buffers
     private void RebuildMeshObjectBuffers()
     {
         if (!_meshObjectsNeedRebuilding)
@@ -87,28 +96,52 @@ public class RayTracingMaster : MonoBehaviour
         foreach(RayTracingObject obj in _rayTracingObjects)
         {
             Mesh mesh = obj.GetComponent<MeshFilter>().sharedMesh;
+            MeshRenderer meshRenderer = obj.GetComponent<MeshRenderer>();
 
-            // Add vertex data
-            int firstVertex = _vertices.Count;
-            _vertices.AddRange(mesh.vertices);
 
-            // Add index data - if the vertex buffer wasn't empty before, the
-            // indices need to be offset
-            int firstIndex = _indices.Count;
-            var indices = mesh.GetIndices(0);
-            _indices.AddRange(indices.Select(index => index + firstVertex));
-
-            _meshObjects.Add(new MeshObject()
+            for (int submesh = 0; submesh < mesh.subMeshCount; submesh++)
             {
-                localToWorldMatrix = obj.transform.localToWorldMatrix,
-                indices_offset = firstIndex,
-                indices_count = indices.Length
-            });
+                // Add vertex data
+                int firstVertex = _vertices.Count;
+                _vertices.AddRange(mesh.vertices);
+
+                // get and add submesh index data
+                int[] submeshIndices = mesh.GetIndices(submesh);
+                int firstIndex = _indices.Count;
+                _indices.AddRange(submeshIndices.Select(index => index + firstVertex));
+
+                // get meaterial properties
+                //Vector4 albedo = meshRenderer.sharedMaterial.GetVector("_Color");
+                Vector4 albedo = Color.white;
+                if (submesh < meshRenderer.sharedMaterials.Length)
+                {
+                    Material mat = meshRenderer.sharedMaterials[submesh];
+                    if (mat != null && mat.HasProperty("_Color"))
+                    {
+                        albedo = mat.GetVector("_Color");
+                    }
+                }
+
+                // Add the object to the list
+                _meshObjects.Add(new MeshObject()
+                {
+                    localToWorldMatrix = obj.transform.localToWorldMatrix,
+                    indices_offset = firstIndex,
+                    indices_count = submeshIndices.Length,
+                    albedo = albedo
+                });
+            }
         }
 
-        CreateComputeBuffer(ref _meshObjectBuffer, _meshObjects, 72);
-        CreateComputeBuffer(ref _vertexBuffer, _vertices, 12);
-        CreateComputeBuffer(ref _indexBuffer, _indices, 4);
+        if (_meshObjects.Count == 0)
+        {
+            Debug.LogWarning("No objects to trace.");
+            return;
+        }
+
+        CreateComputeBuffer(ref _MeshObjectBuffer, _meshObjects, 88);
+        CreateComputeBuffer(ref _VerticesBuffer, _vertices, 12);
+        CreateComputeBuffer(ref _IndicesBuffer, _indices, 4);
     }
 
     private static void CreateComputeBuffer<T>(ref ComputeBuffer buffer, List<T> data, int stride) where T:struct
@@ -156,24 +189,33 @@ public class RayTracingMaster : MonoBehaviour
             _target.Create();
         }
     }
-    private void Render(RenderTexture destination)
-    {
-        // Make sure we have a current render target
-        InitRenderTexture();
+    //private void Render(RenderTexture destination)
+    //{
+    //    // Make sure we have a current render target
+    //    InitRenderTexture();
 
-        // Set the target and dispatch the compute shader
-        RayTracingShader.SetTexture(0, "Result", _target);
-        // 8 is the number of threads per group
-        RayTracingShader.Dispatch(0, Mathf.CeilToInt(_target.width / 8), Mathf.CeilToInt(_target.height / 8), 1);
+    //    // Set the target and dispatch the compute shader
+    //    RayTracingShader.SetTexture(0, "Result", _target);
+    //    // 8 is the number of threads per group
+    //    RayTracingShader.Dispatch(0, Mathf.CeilToInt(_target.width / 8.0f), Mathf.CeilToInt(_target.height / 8.0f), 1);
 
-        // Blit the result texture to the screen
-        Graphics.Blit(_target, destination);
-    }
+    //    // Blit the result texture to the screen
+    //    Graphics.Blit(_target, destination);
+    //}
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
         RebuildMeshObjectBuffers();
         SetShaderParameters();
-        Render(destination);
+        InitRenderTexture();
+
+        // command buffer setting
+        _command.Clear();
+        _command.SetComputeTextureParam(RayTracingShader, 0, "Result", _target);
+        _command.DispatchCompute(RayTracingShader, 0, Mathf.CeilToInt(_target.width / 8.0f), Mathf.CeilToInt(_target.height / 8.0f), 1);
+        _command.Blit(_target, destination);
+        Graphics.ExecuteCommandBuffer(_command);
+
+        //Render(destination);
     }
 }
