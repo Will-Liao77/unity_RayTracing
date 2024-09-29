@@ -9,9 +9,9 @@ public class RayTracingMaster : MonoBehaviour
 {
     public ComputeShader RayTracingShader;
     private RenderTexture _target;
+    private RenderTexture _converged;
     private Camera _camera;
-    private uint _currentSample = 0;
-    // about mesh
+    // about mesh variables
     private static bool _meshObjectsNeedRebuilding = false;
     private static List<RayTracingObject> _rayTracingObjects = new List<RayTracingObject>();
     private static List<MeshObject> _meshObjects = new List<MeshObject>();
@@ -27,7 +27,7 @@ public class RayTracingMaster : MonoBehaviour
         public Matrix4x4 localToWorldMatrix;
         public int indices_offset;
         public int indices_count;
-        public Vector4 albedo;
+        //public Vector4 albedo;
     }
 
     private void Start()
@@ -59,7 +59,7 @@ public class RayTracingMaster : MonoBehaviour
         // set the camera's matrices to compute shader
         RayTracingShader.SetMatrix("_CameraToWorld", _camera.cameraToWorldMatrix);
         RayTracingShader.SetMatrix("_CameraInverseProjection", _camera.projectionMatrix.inverse);
-
+        RayTracingShader.SetVector("_PixelOffset", new Vector2(Random.value, Random.value));
         // set mesh data to compute shader
         SetComputeBuffer("_MeshObjectBuffer", _MeshObjectBuffer);
         SetComputeBuffer("_VerticesBuffer", _VerticesBuffer);
@@ -86,7 +86,6 @@ public class RayTracingMaster : MonoBehaviour
         }
 
         _meshObjectsNeedRebuilding = false;
-        _currentSample = 0;
 
         // Clear any existing buffers
         _meshObjects.Clear();
@@ -112,15 +111,15 @@ public class RayTracingMaster : MonoBehaviour
 
                 // get meaterial properties
                 //Vector4 albedo = meshRenderer.sharedMaterial.GetVector("_Color");
-                Vector4 albedo = Color.white;
-                if (submesh < meshRenderer.sharedMaterials.Length)
-                {
-                    Material mat = meshRenderer.sharedMaterials[submesh];
-                    if (mat != null && mat.HasProperty("_Color"))
-                    {
-                        albedo = mat.GetVector("_Color");
-                    }
-                }
+                ////Vector4 albedo = Color.white;
+                //if (submesh < meshRenderer.sharedMaterials.Length)
+                //{
+                //    Material mat = meshRenderer.sharedMaterials[submesh];
+                //    if (mat != null && mat.HasProperty("_Color"))
+                //    {
+                //        albedo = mat.GetVector("_Color");
+                //    }
+                //}
 
                 // Add the object to the list
                 _meshObjects.Add(new MeshObject()
@@ -128,7 +127,7 @@ public class RayTracingMaster : MonoBehaviour
                     localToWorldMatrix = obj.transform.localToWorldMatrix,
                     indices_offset = firstIndex,
                     indices_count = submeshIndices.Length,
-                    albedo = albedo
+                    //albedo = albedo
                 });
             }
         }
@@ -139,7 +138,7 @@ public class RayTracingMaster : MonoBehaviour
             return;
         }
 
-        CreateComputeBuffer(ref _MeshObjectBuffer, _meshObjects, 88);
+        CreateComputeBuffer(ref _MeshObjectBuffer, _meshObjects, 72);
         CreateComputeBuffer(ref _VerticesBuffer, _vertices, 12);
         CreateComputeBuffer(ref _IndicesBuffer, _indices, 4);
     }
@@ -187,6 +186,11 @@ public class RayTracingMaster : MonoBehaviour
             _target = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
             _target.enableRandomWrite = true;
             _target.Create();
+
+            // convered for waht?
+            _converged = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+            _converged.enableRandomWrite = true;
+            _converged.Create();
         }
     }
     //private void Render(RenderTexture destination)
@@ -214,6 +218,7 @@ public class RayTracingMaster : MonoBehaviour
         _command.SetComputeTextureParam(RayTracingShader, 0, "Result", _target);
         _command.DispatchCompute(RayTracingShader, 0, Mathf.CeilToInt(_target.width / 8.0f), Mathf.CeilToInt(_target.height / 8.0f), 1);
         _command.Blit(_target, destination);
+        _command.Blit(destination, _converged);
         Graphics.ExecuteCommandBuffer(_command);
 
         //Render(destination);
