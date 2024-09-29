@@ -27,7 +27,10 @@ public class RayTracingMaster : MonoBehaviour
         public Matrix4x4 localToWorldMatrix;
         public int indices_offset;
         public int indices_count;
-        //public Vector4 albedo;
+        public Vector4 albedo;
+        public Vector4 specular;
+        public float smoothness;
+        public Vector4 emission;
     }
 
     private void Start()
@@ -138,7 +141,7 @@ public class RayTracingMaster : MonoBehaviour
             return;
         }
 
-        CreateComputeBuffer(ref _MeshObjectBuffer, _meshObjects, 72);
+        CreateComputeBuffer(ref _MeshObjectBuffer, _meshObjects, 124);
         CreateComputeBuffer(ref _VerticesBuffer, _vertices, 12);
         CreateComputeBuffer(ref _IndicesBuffer, _indices, 4);
     }

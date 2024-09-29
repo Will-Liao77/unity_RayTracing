@@ -100,7 +100,10 @@ struct MeshObject
     float4x4 localToWorldMatrix;
     int indices_offset;
     int indices_count;
-    //float4 albedo;
+    float4 albedo;
+    float4 specular;
+    float smoothness;
+    float4 emission;
 };
 
 StructuredBuffer<MeshObject> _MeshObjectBuffer;
@@ -167,10 +170,11 @@ void IntersectMeshObject(Ray ray, inout RayHit bestHit, MeshObject meshObject)
                 bestHit.distance = t;
                 bestHit.position = ray.origin + t * ray.direction;
                 bestHit.normal = normalize(cross(v1 - v0, v2 - v0));
-                bestHit.albedo = 0.0f;
-                bestHit.specular = 0.65f;
-                bestHit.smoothness = 0.99f;
-                bestHit.emission = 0.0f;
+                bestHit.albedo = meshObject.albedo.xyz;
+                bestHit.specular = meshObject.specular.xyz;
+                bestHit.smoothness = meshObject.smoothness;
+                bestHit.emission = meshObject.emission.xyz;
+                
             }
         }
     }
@@ -236,6 +240,7 @@ float3 Shade(inout Ray ray, RayHit hit)
     //    float specChance = energy(hit.specular);
     //    float diffChance = energy(hit.albedo);
 
+    //    float3 color = hit.emission;
     //    // Roulette-select the ray's path
     //    float roulette = rand();
     //    if (roulette < specChance)
@@ -260,11 +265,11 @@ float3 Shade(inout Ray ray, RayHit hit)
     //        ray.energy = 0.0f;
     //    }
 
-    //    return hit.emission;
+    //    return color;
     //}
     //else
     //{
-    //    return float3(1.0f, 1.0f, 1.0f);
+    //    return float3(0.0f, 0.0f, 0.0f);
     //}
     if (hit.distance < 1.#INF)
     {
