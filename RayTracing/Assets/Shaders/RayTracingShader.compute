@@ -9,7 +9,7 @@ float4x4 _CameraToWorld;
 float4x4 _CameraInverseProjection;
 float2 _PixelOffset;
 static const float PI = 3.14159265f;
-static const float EPSILON = 1e-5;
+static const float EPSILON = 1e-6;
 
 //-----------------------------------
 // Utilty
@@ -55,7 +55,7 @@ Ray CreateRay(float3 origin, float3 direction)
 Ray CreateCameraRay(float2 uv)
 {
     // Transform from screen space to world space
-    float3 origin = mul(_CameraToWorld, float4(0, 0, 0, 1)).xyz;
+    float3 origin = mul(_CameraToWorld, float4(0.0f, 0.0f, 0.0f, 1.0f)).xyz;
     
     //Inverse the perspective projection
     float3 direction = mul(_CameraInverseProjection, float4(uv, 0.0f, 1.0f)).xyz;
@@ -108,54 +108,71 @@ struct MeshObject
 
 StructuredBuffer<MeshObject> _MeshObjectBuffer;
 StructuredBuffer<float3> _VerticesBuffer;
-StructuredBuffer <int> _IndicesBuffer;
+StructuredBuffer<int> _IndicesBuffer;
 
 //-----------------------------------
 // Intersection
-bool IntersectTriangle_MT97(Ray ray, float3 vert0, float3 vert1, float3 vert2,
+bool IntersectTriangle(Ray ray, float3 vert0, float3 vert1, float3 vert2,
 	inout float t, inout float u, inout float v)
 {
-	// find vectors for two edges sharing vert0
+ //   // find vectors for two edges sharing vert0
+ //   float3 edge1 = vert1 - vert0;
+ //   float3 edge2 = vert2 - vert0;
+
+	//// begin calculating determinant - also used to calculate U parameter
+ //   float3 pvec = cross(ray.direction, edge2);
+
+	//// if determinant is near zero, ray lies in plane of triangle
+ //   float det = dot(edge1, pvec);
+
+	//// use backface culling
+ //   if (det < EPSILON)
+ //       return false;
+ //   float inv_det = 1.0f / det;
+
+	//// calculate distance from vert0 to ray origin
+ //   float3 tvec = ray.origin - vert0;
+
+	//// calculate U parameter and test bounds
+ //   u = dot(tvec, pvec) * inv_det;
+ //   if (u < 0.0 || u > 1.0f)
+ //       return false;
+
+	//// prepare to test V parameter
+ //   float3 qvec = cross(tvec, edge1);
+
+	//// calculate V parameter and test bounds
+ //   v = dot(ray.direction, qvec) * inv_det;
+ //   if (v < 0.0 || u + v > 1.0f)
+ //       return false;
+
+	//// calculate t, ray intersects triangle
+ //   t = dot(edge2, qvec) * inv_det;
+
+ //   return t > EPSILON;
     float3 edge1 = vert1 - vert0;
     float3 edge2 = vert2 - vert0;
-
-	// begin calculating determinant - also used to calculate U parameter
     float3 pvec = cross(ray.direction, edge2);
-
-	// if determinant is near zero, ray lies in plane of triangle
     float det = dot(edge1, pvec);
-
-	// use backface culling
-    if (det < EPSILON)
+    if (abs(det) < EPSILON)
         return false;
-    float inv_det = 1.0f / det;
-
-	// calculate distance from vert0 to ray origin
+    float invDet = 1.0f / det;
     float3 tvec = ray.origin - vert0;
-
-	// calculate U parameter and test bounds
-    u = dot(tvec, pvec) * inv_det;
-    if (u < 0.0 || u > 1.0f)
+    u = dot(tvec, pvec) * invDet;
+    if (u < 0.0f || u > 1.0f)
         return false;
-
-	// prepare to test V parameter
     float3 qvec = cross(tvec, edge1);
-
-	// calculate V parameter and test bounds
-    v = dot(ray.direction, qvec) * inv_det;
-    if (v < 0.0 || u + v > 1.0f)
+    v = dot(ray.direction, qvec) * invDet;
+    if (v < 0.0f || u + v > 1.0f)
         return false;
-
-	// calculate t, ray intersects triangle
-    t = dot(edge2, qvec) * inv_det;
-
-    return true;
+    t = dot(edge2, qvec) * invDet;
+    return t > EPSILON;
 }
 
 void IntersectMeshObject(Ray ray, inout RayHit bestHit, MeshObject meshObject)
 {
     uint offset = meshObject.indices_offset;
-    uint count = meshObject.indices_count;
+    uint count = offset + meshObject.indices_count;
     for (uint i = offset; i < count; i += 3)
     {
         float3 v0 = (mul(meshObject.localToWorldMatrix, float4(_VerticesBuffer[_IndicesBuffer[i]], 1.0f))).xyz;
@@ -163,17 +180,15 @@ void IntersectMeshObject(Ray ray, inout RayHit bestHit, MeshObject meshObject)
         float3 v2 = (mul(meshObject.localToWorldMatrix, float4(_VerticesBuffer[_IndicesBuffer[i + 2]], 1.0f))).xyz;
         
         float t, u, v;
-        if (IntersectTriangle_MT97(ray, v0, v1, v2, t, u, v))
+        if (IntersectTriangle(ray, v0, v1, v2, t, u, v))
         {
-            //if (t > 0 && t < bestHit.distance)
-            // t get some error
-            if (t < 0 && t < bestHit.distance)
+            if (t < bestHit.distance)
             {
                 bestHit.distance = t;
                 bestHit.position = ray.origin + t * ray.direction;
                 bestHit.normal = normalize(cross(v1 - v0, v2 - v0));
-                //bestHit.albedo = meshObject.albedo.xyz;
-                bestHit.albedo = 1.0f;
+                bestHit.albedo = meshObject.albedo.xyz;
+                //bestHit.albedo = 1.0f;
                 bestHit.specular = meshObject.specular.xyz;
                 bestHit.smoothness = meshObject.smoothness;
                 bestHit.emission = meshObject.emission.xyz;
@@ -283,14 +298,22 @@ float3 Shade(inout Ray ray, RayHit hit)
     //    return float3(0.0f, 0.0f, 0.0f);
     //}
 
-    return hit.albedo;
+    if (hit.distance < 1.#INF)
+    {
+        return hit.normal;
+    }
+    else
+    {
+        return float3(0.0f, 0.0f, 0.0f);
+    }
+    //return hit.albedo;
 }
 
 //-----------------------------------
 // kernel
-[numthreads(8,8,1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
-{    
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
     _pixel = float2(id.xy);
     // Get the dimensions of the render texture
     uint width, height;

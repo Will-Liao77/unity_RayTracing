@@ -1,92 +1,32 @@
-Base path: 'C:/Program Files/Unity/Hub/Editor/2022.3.9f1/Editor/Data', plugins path 'C:/Program Files/Unity/Hub/Editor/2022.3.9f1/Editor/Data/PlaybackEngines'
+Base path: 'D:/Unity Editor/2022.3.9f1/Editor/Data', plugins path 'D:/Unity Editor/2022.3.9f1/Editor/Data/PlaybackEngines'
 Cmd: initializeCompiler
 
 Cmd: compileComputeKernel
-  insize=8747 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(305): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3613
+  insize=8512 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(297): loop only executes for 1 iteration(s), forcing loop to unroll
+ ok=1 outsize=3669
 
 Cmd: compileComputeKernel
-  insize=8749 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(305): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3417
+  insize=8512 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(297): loop only executes for 1 iteration(s), forcing loop to unroll
+ ok=1 outsize=3609
 
 Cmd: compileComputeKernel
-  insize=8790 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(306): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3417
+  insize=9507 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(332): loop only executes for 1 iteration(s), forcing loop to unroll
+ ok=1 outsize=3629
 
 Cmd: compileComputeKernel
-  insize=8788 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(306): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3501
+  insize=9516 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(332): loop only executes for 1 iteration(s), forcing loop to unroll
+ ok=1 outsize=3685
 
 Cmd: compileComputeKernel
-  insize=8751 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(305): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3557
+  insize=9514 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(332): loop only executes for 1 iteration(s), forcing loop to unroll
+ ok=1 outsize=3665
 
 Cmd: compileComputeKernel
-  insize=8751 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(305): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3557
+  insize=9532 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(332): loop only executes for 1 iteration(s), forcing loop to unroll
+ ok=1 outsize=3669
 
 Cmd: compileComputeKernel
-  insize=8761 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(305): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3661
-
-Cmd: compileComputeKernel
-  insize=8763 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(306): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3661
-
-Cmd: compileComputeKernel
-  insize=8762 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(306): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3661
-
-Cmd: compileComputeKernel
-  insize=8827 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(307): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=329
-
-Cmd: compileComputeKernel
-  insize=8813 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(307): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3273
-
-Cmd: compileComputeKernel
-  insize=8793 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(307): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3553
-
-Cmd: compileComputeKernel
-  insize=8795 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(307): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3501
-
-Cmd: compileComputeKernel
-  insize=8835 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(308): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3445
-
-Cmd: compileComputeKernel
-  insize=8843 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(308): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3501
-
-Cmd: compileComputeKernel
-  insize=19 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 2 plat 4 at RayTracingShader.compute(1): unrecognized identifier 'INVALID_UTF8_STRING'
- ok=0 outsize=0
-
-Cmd: compileComputeKernel
-  insize=19 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 2 plat 4 at RayTracingShader.compute(1): unrecognized identifier 'INVALID_UTF8_STRING'
- ok=0 outsize=0
-
-Cmd: compileComputeKernel
-  insize=19 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 2 plat 4 at RayTracingShader.compute(1): unrecognized identifier 'INVALID_UTF8_STRING'
- ok=0 outsize=0
-
-Cmd: compileComputeKernel
-  insize=19 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 2 plat 4 at RayTracingShader.compute(1): unrecognized identifier 'INVALID_UTF8_STRING'
- ok=0 outsize=0
-
-Cmd: compileComputeKernel
-  insize=8862 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(309): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3501
-
-Cmd: compileComputeKernel
-  insize=8870 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(309): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3553
-
-Cmd: compileComputeKernel
-  insize=8870 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(309): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3501
+  insize=9532 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(332): loop only executes for 1 iteration(s), forcing loop to unroll
+ ok=1 outsize=3609
 
 Cmd: shutdown

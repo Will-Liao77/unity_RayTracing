@@ -103,6 +103,8 @@ public class RayTracingMaster : MonoBehaviour
             Mesh mesh = obj.GetComponent<MeshFilter>().sharedMesh;
             MeshRenderer meshRenderer = obj.GetComponent<MeshRenderer>();
 
+            // Get the object's material
+            Material[] materials = meshRenderer.sharedMaterials;
 
             for (int submesh = 0; submesh < mesh.subMeshCount; submesh++)
             {
@@ -118,17 +120,12 @@ public class RayTracingMaster : MonoBehaviour
                 // add the number of triangles in this submesh
                 //totalTriangleCount += submeshIndices.Length / 3;
 
-                // get meaterial properties
-                //Vector4 albedo = meshRenderer.sharedMaterial.GetVector("_Color");
-                ////Vector4 albedo = Color.white;
-                //if (submesh < meshRenderer.sharedMaterials.Length)
-                //{
-                //    Material mat = meshRenderer.sharedMaterials[submesh];
-                //    if (mat != null && mat.HasProperty("_Color"))
-                //    {
-                //        albedo = mat.GetVector("_Color");
-                //    }
-                //}
+                // get the material properties
+                Material material = materials[Mathf.Min(submesh, materials.Length - 1)];
+                Vector3 albedo = material.GetVector("_Color");
+                Vector3 specular = material.GetVector("_SpecColor");
+                float smoothness = material.GetFloat("_Glossiness");
+                Vector3 emission = material.GetVector("_EmissionColor");
 
                 // Add the object to the list
                 _meshObjects.Add(new MeshObject()
@@ -136,7 +133,10 @@ public class RayTracingMaster : MonoBehaviour
                     localToWorldMatrix = obj.transform.localToWorldMatrix,
                     indices_offset = firstIndex,
                     indices_count = submeshIndices.Length,
-                    //albedo = albedo
+                    albedo = albedo,
+                    specular = specular,
+                    smoothness = smoothness,
+                    emission = emission
                 });
             }
         }
@@ -155,7 +155,7 @@ public class RayTracingMaster : MonoBehaviour
         CreateComputeBuffer(ref _IndicesBuffer, _indices, 4);
     }
 
-    private static void CreateComputeBuffer<T>(ref ComputeBuffer buffer, List<T> data, int stride) where T:struct
+    private static void CreateComputeBuffer<T>(ref ComputeBuffer buffer, List<T> data, int stride) where T : struct
     {
         if (buffer != null)
         {
@@ -205,6 +205,7 @@ public class RayTracingMaster : MonoBehaviour
             _converged.Create();
         }
     }
+
     //private void Render(RenderTexture destination)
     //{
     //    // Make sure we have a current render target
@@ -224,6 +225,7 @@ public class RayTracingMaster : MonoBehaviour
         RebuildMeshObjectBuffers();
         SetShaderParameters();
         InitRenderTexture();
+        //Render(destination);
 
         // command buffer setting
         _command.Clear();
@@ -232,7 +234,5 @@ public class RayTracingMaster : MonoBehaviour
         _command.Blit(_target, destination);
         _command.Blit(destination, _converged);
         Graphics.ExecuteCommandBuffer(_command);
-
-        //Render(destination);
     }
 }
