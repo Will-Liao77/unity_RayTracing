@@ -376,6 +376,7 @@
 "Assets/OBJImport/TextureLoader/TGALoader.cs"
 "Assets/Scripts/ObjFileBrowser.cs"
 "Assets/Scripts/RayTracingMaster.cs"
+"Assets/Scripts/RayTracingObject.cs"
 "Assets/temp/RayTracingController.cs"
 "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark01.cs"
 "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark01_UGUI.cs"

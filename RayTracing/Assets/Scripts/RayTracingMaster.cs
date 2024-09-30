@@ -95,7 +95,10 @@ public class RayTracingMaster : MonoBehaviour
         _vertices.Clear();
         _indices.Clear();
 
-        foreach(RayTracingObject obj in _rayTracingObjects)
+        //for debug
+        //int totalTriangleCount = 0;
+
+        foreach (RayTracingObject obj in _rayTracingObjects)
         {
             Mesh mesh = obj.GetComponent<MeshFilter>().sharedMesh;
             MeshRenderer meshRenderer = obj.GetComponent<MeshRenderer>();
@@ -111,6 +114,9 @@ public class RayTracingMaster : MonoBehaviour
                 int[] submeshIndices = mesh.GetIndices(submesh);
                 int firstIndex = _indices.Count;
                 _indices.AddRange(submeshIndices.Select(index => index + firstVertex));
+
+                // add the number of triangles in this submesh
+                //totalTriangleCount += submeshIndices.Length / 3;
 
                 // get meaterial properties
                 //Vector4 albedo = meshRenderer.sharedMaterial.GetVector("_Color");
@@ -140,6 +146,9 @@ public class RayTracingMaster : MonoBehaviour
             Debug.LogWarning("No objects to trace.");
             return;
         }
+
+        // for debug
+        //Debug.Log("Triangle count: " + totalTriangleCount);
 
         CreateComputeBuffer(ref _MeshObjectBuffer, _meshObjects, 124);
         CreateComputeBuffer(ref _VerticesBuffer, _vertices, 12);
