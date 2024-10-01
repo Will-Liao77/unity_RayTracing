@@ -300,7 +300,7 @@ float3 Shade(inout Ray ray, RayHit hit)
 
     if (hit.distance < 1.#INF)
     {
-        return hit.normal;
+        return -hit.normal * 0.5 + 0.5;
     }
     else
     {
