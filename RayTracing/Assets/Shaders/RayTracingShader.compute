@@ -8,6 +8,7 @@ RWTexture2D<float4> Result;
 float4x4 _CameraToWorld;
 float4x4 _CameraInverseProjection;
 float2 _PixelOffset;
+float4 _PointLight;
 static const float PI = 3.14159265f;
 static const float EPSILON = 1e-6;
 
@@ -115,56 +116,36 @@ StructuredBuffer<int> _IndicesBuffer;
 bool IntersectTriangle(Ray ray, float3 vert0, float3 vert1, float3 vert2,
 	inout float t, inout float u, inout float v)
 {
- //   // find vectors for two edges sharing vert0
- //   float3 edge1 = vert1 - vert0;
- //   float3 edge2 = vert2 - vert0;
-
-	//// begin calculating determinant - also used to calculate U parameter
- //   float3 pvec = cross(ray.direction, edge2);
-
-	//// if determinant is near zero, ray lies in plane of triangle
- //   float det = dot(edge1, pvec);
-
-	//// use backface culling
- //   if (det < EPSILON)
- //       return false;
- //   float inv_det = 1.0f / det;
-
-	//// calculate distance from vert0 to ray origin
- //   float3 tvec = ray.origin - vert0;
-
-	//// calculate U parameter and test bounds
- //   u = dot(tvec, pvec) * inv_det;
- //   if (u < 0.0 || u > 1.0f)
- //       return false;
-
-	//// prepare to test V parameter
- //   float3 qvec = cross(tvec, edge1);
-
-	//// calculate V parameter and test bounds
- //   v = dot(ray.direction, qvec) * inv_det;
- //   if (v < 0.0 || u + v > 1.0f)
- //       return false;
-
-	//// calculate t, ray intersects triangle
- //   t = dot(edge2, qvec) * inv_det;
-
- //   return t > EPSILON;
+    // find vectors for two edges sharing vert0
     float3 edge1 = vert1 - vert0;
     float3 edge2 = vert2 - vert0;
+    
+    // begin calculating determinant - also used to calculate U parameter
     float3 pvec = cross(ray.direction, edge2);
+    
+    // if determinant is near zero, ray lies in plane of triangle
     float det = dot(edge1, pvec);
     if (abs(det) < EPSILON)
         return false;
     float invDet = 1.0f / det;
+    
+    // calculate distance from vert0 to ray origin
     float3 tvec = ray.origin - vert0;
+    
+    // calculate U parameter and test bounds
     u = dot(tvec, pvec) * invDet;
     if (u < 0.0f || u > 1.0f)
         return false;
+    
+    // prepare to test V parameter
     float3 qvec = cross(tvec, edge1);
+    
+    // calculate V parameter and test bounds
     v = dot(ray.direction, qvec) * invDet;
     if (v < 0.0f || u + v > 1.0f)
         return false;
+    
+    // calculate t, ray intersects triangle
     t = dot(edge2, qvec) * invDet;
     return t > EPSILON;
 }
@@ -289,24 +270,33 @@ float3 Shade(inout Ray ray, RayHit hit)
     //{
     //    return float3(0.0f, 0.0f, 0.0f);
     //}
+    
+    // Calculate the lighting
     //if (hit.distance < 1.#INF)
     //{
-    //    return hit.normal * 0.5f + 0.5f;
-    //}
-    //else
-    //{
-    //    return float3(0.0f, 0.0f, 0.0f);
-    //}
+    //    float3 lightDir = normalize(_PointLight.xyz - hit.position);
+    //    float3 lightDistance = length(_PointLight.xyz - hit.position);
+    //    float3 normal = hit.normal;
+        
+    //    // diffuse
+    //    float diffuse = max(dot(normal, lightDir), 0.0f);
+    //    float3 diffuseColor = hit.albedo * diffuse;
+        
+    //    float attenuation = 1.0 / (1.0 + 0.09 * lightDistance + 0.032 * (lightDistance * lightDistance));
 
+    //    float3 ambient = 0.1f * hit.albedo;
+        
+    //}
+    
     if (hit.distance < 1.#INF)
     {
+        // add - cause the normal is in the wrong direction
         return -hit.normal * 0.5 + 0.5;
     }
     else
     {
         return float3(0.0f, 0.0f, 0.0f);
     }
-    //return hit.albedo;
 }
 
 //-----------------------------------

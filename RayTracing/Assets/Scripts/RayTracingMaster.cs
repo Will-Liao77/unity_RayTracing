@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.PackageManager;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Rendering;
 
 public class RayTracingMaster : MonoBehaviour
@@ -11,6 +12,7 @@ public class RayTracingMaster : MonoBehaviour
     private RenderTexture _target;
     private RenderTexture _converged;
     private Camera _camera;
+    private Light _pointLight;
     // about mesh variables
     private static bool _meshObjectsNeedRebuilding = false;
     private static List<RayTracingObject> _rayTracingObjects = new List<RayTracingObject>();
@@ -48,6 +50,10 @@ public class RayTracingMaster : MonoBehaviour
         _camera = GetComponent<Camera>();
     }
 
+    private void OnEnable()
+    {
+        SetUpScene();
+    }
     private void OnDisable()
     {
         // ? is a null-conditional operator
@@ -63,6 +69,11 @@ public class RayTracingMaster : MonoBehaviour
         RayTracingShader.SetMatrix("_CameraToWorld", _camera.cameraToWorldMatrix);
         RayTracingShader.SetMatrix("_CameraInverseProjection", _camera.projectionMatrix.inverse);
         RayTracingShader.SetVector("_PixelOffset", new Vector2(Random.value, Random.value));
+
+        // set the light's position to compute shader
+        Vector3 l = _pointLight.transform.position;
+        RayTracingShader.SetVector("_PointLight", new Vector4(l.x, l.y, l.z, _pointLight.intensity));
+
         // set mesh data to compute shader
         SetComputeBuffer("_MeshObjectBuffer", _MeshObjectBuffer);
         SetComputeBuffer("_VerticesBuffer", _VerticesBuffer);
@@ -78,6 +89,21 @@ public class RayTracingMaster : MonoBehaviour
     {
         _rayTracingObjects.Remove(obj);
         _meshObjectsNeedRebuilding = true;
+    }
+
+    // setup scene
+    private void SetUpScene()
+    {
+        // instatiate pointlight
+        GameObject pointLight = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        pointLight.name = "Point Light";
+        pointLight.transform.position = new Vector3(-7.4f, -10.13f, 0.15f);
+        pointLight.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+        pointLight.AddComponent<Light>();
+        pointLight.GetComponent<Light>().intensity = 2.0f;
+        pointLight.GetComponent<Light>().color = Color.white;
+        pointLight.GetComponent<Light>().range = 11.34f;
+        _pointLight = pointLight.GetComponent<Light>();
     }
 
     // Rebuild the mesh object buffers
