@@ -8,11 +8,17 @@ using UnityEngine.Rendering;
 
 public class RayTracingMaster : MonoBehaviour
 {
+    // public
     public ComputeShader RayTracingShader;
+
+    // private
     private RenderTexture _target;
     private RenderTexture _converged;
     private Camera _camera;
+    // light for ray tracing
     private Light _pointLight;
+    // texture for ray tracing
+    //private List<Texture2D> _textures = new List<Texture2D>();
     // about mesh variables
     private static bool _meshObjectsNeedRebuilding = false;
     private static List<RayTracingObject> _rayTracingObjects = new List<RayTracingObject>();
@@ -117,6 +123,7 @@ public class RayTracingMaster : MonoBehaviour
         _meshObjectsNeedRebuilding = false;
 
         // Clear any existing buffers
+        //_textures.Clear();
         _meshObjects.Clear();
         _vertices.Clear();
         _indices.Clear();
@@ -143,11 +150,41 @@ public class RayTracingMaster : MonoBehaviour
                 int firstIndex = _indices.Count;
                 _indices.AddRange(submeshIndices.Select(index => index + firstVertex));
 
-                // add the number of triangles in this submesh
-                //totalTriangleCount += submeshIndices.Length / 3;
+                // for debug
+                // totalTriangleCount += submeshIndices.Length / 3;
 
                 // get the material properties
                 Material material = materials[Mathf.Min(submesh, materials.Length - 1)];
+
+                // init setting Texture
+                //int albedoTexID = -1;
+                //int normalTexID = -1;
+                //bool hasAlbedoTex = false;
+                //bool hasNormalTex = false;
+
+                //// check if the material has a texture assigned
+                //if (material.HasProperty("_MainTex"))
+                //{
+                //    Texture2D albedoTexture = material.GetTexture("_MainTex") as Texture2D;
+                //    if (albedoTexture != null)
+                //    {
+                //        albedoTexID = _textures.Count;
+                //        _textures.Add(albedoTexture);
+                //        hasAlbedoTex = true;
+                //    }
+                //}
+
+                //if (material.HasProperty("_BumpMap"))
+                //{
+                //    Texture2D normalTexture = material.GetTexture("_BumpMap") as Texture2D;
+                //    if (normalTexture != null)
+                //    {
+                //        normalTexID = _textures.Count;
+                //        _textures.Add(normalTexture);
+                //        hasNormalTex = true;
+                //    }
+                //}
+
                 Vector3 albedo = material.GetVector("_Color");
                 Vector3 specular = material.GetVector("_SpecColor");
                 float smoothness = material.GetFloat("_Glossiness");
@@ -162,7 +199,7 @@ public class RayTracingMaster : MonoBehaviour
                     albedo = albedo,
                     specular = specular,
                     smoothness = smoothness,
-                    emission = emission
+                    emission = emission,
                 });
             }
         }
