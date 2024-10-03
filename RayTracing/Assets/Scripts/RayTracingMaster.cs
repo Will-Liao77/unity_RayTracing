@@ -12,13 +12,23 @@ public class RayTracingMaster : MonoBehaviour
     public ComputeShader RayTracingShader;
 
     // private
+    // Render texture
     private RenderTexture _target;
     private RenderTexture _converged;
+
+    // camera
     private Camera _camera;
-    // light for ray tracing
+
+    // point light
     private Light _pointLight;
+
     // texture for ray tracing
     //private List<Texture2D> _textures = new List<Texture2D>();
+
+    // BVH variables
+    private List<BvhNode> _bvhNodes = new List<BvhNode>();
+    private ComputeBuffer _BvhBuffer;
+
     // about mesh variables
     private static bool _meshObjectsNeedRebuilding = false;
     private static List<RayTracingObject> _rayTracingObjects = new List<RayTracingObject>();
@@ -30,6 +40,7 @@ public class RayTracingMaster : MonoBehaviour
     private ComputeBuffer _IndicesBuffer;
     private CommandBuffer _command;
 
+    // struct
     struct MeshObject
     {
         public Matrix4x4 localToWorldMatrix;
@@ -40,6 +51,15 @@ public class RayTracingMaster : MonoBehaviour
         public float smoothness;
         public Vector4 emission;
     }
+    struct BvhNode
+    {
+        public Vector3 min;
+        public Vector3 max;
+        public int leftChild;
+        public int rightChild;
+        public int meshObjectIndex;
+    }
+
     private void Start()
     {
         if (RayTracingShader == null)
@@ -65,6 +85,7 @@ public class RayTracingMaster : MonoBehaviour
         _MeshObjectBuffer?.Release();
         _VerticesBuffer?.Release();
         _IndicesBuffer?.Release();
+        _bvhNodes?.Clear();
     }
 
     // set parameters to compute shader
@@ -111,6 +132,90 @@ public class RayTracingMaster : MonoBehaviour
         pointLight.GetComponent<Light>().range = 11.34f;
         _pointLight = pointLight.GetComponent<Light>();
     }
+
+    //// BVH 10/4
+    //private void BuildBVH()
+    //{
+    //    // init BVH List
+    //    _bvhNodes?.Clear();
+    //    List<BVHPrimitive> primitives = new List<BVHPrimitive>();
+
+    //    // Create leaf nodes for each mesh object
+    //    for (int i = 0; i < _meshObjects.Count; i++)
+    //    {
+    //        Bounds bounds = CalculateMeshBounds(_meshObjects[i]);
+    //        primitives.Add(new BVHPrimitive { bounds = bounds, meshObjectIndex = i });
+    //    }
+
+    //    BuildBVHRecursive(primitives, 0, primitives.Count, 0);
+
+    //    CreateComputeBuffer(ref _BvhBuffer, _bvhNodes, 36);
+    //}
+    //private int BuildBVHRecursive(List<BVHPrimitive> primitives, int start, int end, int depth)
+    //{
+    //    int nodeIndex = _bvhNodes.Count;
+    //    _bvhNodes.Add(new BvhNode());
+
+    //    if (end - start <= 1)
+    //    {
+    //        // Leaf node
+    //        _bvhNodes[nodeIndex] = new BvhNode
+    //        {
+    //            min = primitives[start].bounds.min,
+    //            max = primitives[start].bounds.max,
+    //            leftChild = -1,
+    //            rightChild = -1,
+    //            meshObjectIndex = primitives[start].meshObjectIndex
+    //        };
+    //    } else
+    //    {
+    //        // internal node
+    //        Bounds nodeBounds = new Bounds(primitives[start].bounds.center, Vector3.zero);
+    //        for (int i = start + 1; i < end; i++)
+    //        {
+    //            nodeBounds.Encapsulate(primitives[i].bounds);
+    //        }
+
+    //        int axis = depth % 3;
+    //        int mid = (start + end) / 2;
+
+    //        primitives.Sort(start, end - start, new BVHComparer(axis));
+
+    //        int leftChild = BuildBVHRecursive(primitives, start, mid, depth + 1);
+    //        int rightChild = BuildBVHRecursive(primitives, mid, end, depth + 1);
+
+    //        _bvhNodes[nodeIndex] = new BvhNode
+    //        {
+    //            min = nodeBounds.min,
+    //            max = nodeBounds.max,
+    //            leftChild = leftChild,
+    //            rightChild = rightChild,
+    //            meshObjectIndex = -1
+    //        };
+    //    }
+
+    //    return nodeIndex;
+    //}
+    //private Bounds CalculateMeshBounds(MeshObject meshObject)
+    //{
+    //    Bounds bounds = new Bounds();
+
+    //    for (int i = 0; i < meshObject.indices_count; i++)
+    //    {
+    //        int index = _indices[meshObject.indices_offset + i];
+    //        Vector3 vertex = meshObject.localToWorldMatrix.MultiplyPoint(_vertices[_indices[meshObject.indices_offset + i]]);
+    //        if (i == 0)
+    //        {
+    //            bounds = new Bounds(vertex, Vector3.zero);
+    //        }
+    //        else
+    //        {
+    //            bounds.Encapsulate(vertex);
+    //        }
+    //    }
+
+    //    return bounds;
+    //}
 
     // Rebuild the mesh object buffers
     private void RebuildMeshObjectBuffers()
@@ -216,6 +321,9 @@ public class RayTracingMaster : MonoBehaviour
         CreateComputeBuffer(ref _MeshObjectBuffer, _meshObjects, 124);
         CreateComputeBuffer(ref _VerticesBuffer, _vertices, 12);
         CreateComputeBuffer(ref _IndicesBuffer, _indices, 4);
+
+        // BVH 10/4
+        //BuildBVH();
     }
 
     private static void CreateComputeBuffer<T>(ref ComputeBuffer buffer, List<T> data, int stride) where T : struct
@@ -297,5 +405,27 @@ public class RayTracingMaster : MonoBehaviour
         _command.Blit(_target, destination);
         _command.Blit(destination, _converged);
         Graphics.ExecuteCommandBuffer(_command);
+    }
+
+    // Helper classes for BVH construction 10/4
+    private struct BVHPrimitive
+    {
+        public Bounds bounds;
+        public int meshObjectIndex;
+    }
+
+    private class BVHComparer : IComparer<BVHPrimitive>
+    {
+        private int _axis;
+
+        public BVHComparer(int axis)
+        {
+            _axis = axis;
+        }
+
+        public int Compare(BVHPrimitive x, BVHPrimitive y)
+        {
+            return x.bounds.center[_axis].CompareTo(y.bounds.center[_axis]);
+        }
     }
 }
