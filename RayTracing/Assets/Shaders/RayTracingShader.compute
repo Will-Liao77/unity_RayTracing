@@ -8,7 +8,11 @@ RWTexture2D<float4> Result;
 float4x4 _CameraToWorld;
 float4x4 _CameraInverseProjection;
 float2 _PixelOffset;
-float4 _PointLight;
+
+// light data
+float3 _PointLightPos;
+float4 _PointLightProperties;
+
 static const float PI = 3.14159265f;
 static const float EPSILON = 1e-6;
 
@@ -239,7 +243,10 @@ float3 Shade(inout Ray ray, RayHit hit)
     //    float specChance = energy(hit.specular);
     //    float diffChance = energy(hit.albedo);
 
-    //    float3 color = hit.emission;
+    //    float3 color = hit.albedo * 0.1f;
+        
+    //    color += hit.emission;
+
     //    // Roulette-select the ray's path
     //    float roulette = rand();
     //    if (roulette < specChance)
@@ -272,21 +279,30 @@ float3 Shade(inout Ray ray, RayHit hit)
     //}
     
     // Calculate the lighting
-    //if (hit.distance < 1.#INF)
-    //{
-    //    float3 lightDir = normalize(_PointLight.xyz - hit.position);
-    //    float3 lightDistance = length(_PointLight.xyz - hit.position);
-    //    float3 normal = hit.normal;
+    if (hit.distance < 1.#INF)
+    {
+        float3 lightDir = normalize(_PointLightPos.xyz - hit.position);
+        float3 lightDistance = length(_PointLightPos.xyz - hit.position);
+        float3 normal = -hit.normal * 0.5 + 0.5;
         
-    //    // diffuse
-    //    float diffuse = max(dot(normal, lightDir), 0.0f);
-    //    float3 diffuseColor = hit.albedo * diffuse;
+        // diffuse
+        float diffuse = max(dot(normal, lightDir), 0.0f);
+        float3 diffuseColor = hit.albedo * diffuse;
         
-    //    float attenuation = 1.0 / (1.0 + 0.09 * lightDistance + 0.032 * (lightDistance * lightDistance));
+        float attenuation = 1.0 / (1.0 + 0.09 * lightDistance + 0.032 * (lightDistance * lightDistance));
 
-    //    float3 ambient = 0.1f * hit.albedo;
+        float3 ambient = 0.1f * hit.albedo;
         
-    //}
+        float3 lightColor = (_PointLightProperties.x * _PointLightProperties.w) + (_PointLightProperties.y * _PointLightProperties.w) + (_PointLightProperties.z * _PointLightProperties.w);
+        
+        float3 color = ambient * (diffuseColor) * lightColor * attenuation + hit.emission;
+
+        return color;
+    }
+    else
+    {
+        return float3(0.0f, 0.0f, 0.0f);
+    }
     
     if (hit.distance < 1.#INF)
     {
@@ -322,7 +338,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     for (int i = 0; i < MAX_DEPTH; i++)
     {
         RayHit hit = TraceRay(ray);
-        result += Shade(ray, hit);
+        result += ray.energy * Shade(ray, hit);
         
         if (!any(ray.energy))
         {

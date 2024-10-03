@@ -34,7 +34,6 @@ public class RayTracingMaster : MonoBehaviour
         public float smoothness;
         public Vector4 emission;
     }
-
     private void Start()
     {
         if (RayTracingShader == null)
@@ -72,7 +71,8 @@ public class RayTracingMaster : MonoBehaviour
 
         // set the light's position to compute shader
         Vector3 l = _pointLight.transform.position;
-        RayTracingShader.SetVector("_PointLight", new Vector4(l.x, l.y, l.z, _pointLight.intensity));
+        RayTracingShader.SetVector("_PointLightPos", new Vector3(l.x, l.y, l.z));
+        RayTracingShader.SetVector("_PointLightProperties", new Vector4(_pointLight.color.r, _pointLight.color.g, _pointLight.color.b, _pointLight.intensity));
 
         // set mesh data to compute shader
         SetComputeBuffer("_MeshObjectBuffer", _MeshObjectBuffer);
@@ -97,7 +97,7 @@ public class RayTracingMaster : MonoBehaviour
         // instatiate pointlight
         GameObject pointLight = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         pointLight.name = "Point Light";
-        pointLight.transform.position = new Vector3(-7.4f, -10.13f, 0.15f);
+        pointLight.transform.position = new Vector3(-7.4f, -10.13f, 0.2f);
         pointLight.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         pointLight.AddComponent<Light>();
         pointLight.GetComponent<Light>().intensity = 2.0f;
