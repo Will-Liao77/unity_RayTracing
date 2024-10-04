@@ -11,7 +11,7 @@ public class RayTracingMaster : MonoBehaviour
     // public
     public ComputeShader RayTracingShader;
 
-    // should render flag
+    // should render flag communicate with ObjFileBrowser.cs to check if the user has loaded a file
     public bool _shouldRender = false;
 
     // private
@@ -21,6 +21,9 @@ public class RayTracingMaster : MonoBehaviour
 
     // camera
     private Camera _camera;
+
+    // check render complete
+    private bool _isRenderComplete = false;
 
     // point light
     private Light _pointLight;
@@ -384,7 +387,7 @@ public class RayTracingMaster : MonoBehaviour
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        if (_shouldRender)
+        if (_shouldRender && !_isRenderComplete)
         {
             RebuildMeshObjectBuffers();
             SetShaderParameters();
@@ -397,6 +400,12 @@ public class RayTracingMaster : MonoBehaviour
             _command.Blit(_target, destination);
             _command.Blit(destination, _converged);
             Graphics.ExecuteCommandBuffer(_command);
+
+            _isRenderComplete = true;
+        }
+        else if (_isRenderComplete)
+        {
+            Graphics.Blit(destination, _converged);
         }
         else
         {
