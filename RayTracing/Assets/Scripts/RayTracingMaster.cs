@@ -11,6 +11,9 @@ public class RayTracingMaster : MonoBehaviour
     // public
     public ComputeShader RayTracingShader;
 
+    // should render flag
+    public bool _shouldRender = false;
+
     // private
     // Render texture
     private RenderTexture _target;
@@ -69,6 +72,8 @@ public class RayTracingMaster : MonoBehaviour
 
         _command = new CommandBuffer();
         _command.name = "Ray Tracing";
+
+        //Debug.Log(_shouldRender);
     }
     private void Awake()
     {
@@ -377,34 +382,26 @@ public class RayTracingMaster : MonoBehaviour
         }
     }
 
-    //private void Render(RenderTexture destination)
-    //{
-    //    // Make sure we have a current render target
-    //    InitRenderTexture();
-
-    //    // Set the target and dispatch the compute shader
-    //    RayTracingShader.SetTexture(0, "Result", _target);
-    //    // 8 is the number of threads per group
-    //    RayTracingShader.Dispatch(0, Mathf.CeilToInt(_target.width / 8.0f), Mathf.CeilToInt(_target.height / 8.0f), 1);
-
-    //    // Blit the result texture to the screen
-    //    Graphics.Blit(_target, destination);
-    //}
-
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        RebuildMeshObjectBuffers();
-        SetShaderParameters();
-        InitRenderTexture();
-        //Render(destination);
+        if (_shouldRender)
+        {
+            RebuildMeshObjectBuffers();
+            SetShaderParameters();
+            InitRenderTexture();
 
-        // command buffer setting
-        _command.Clear();
-        _command.SetComputeTextureParam(RayTracingShader, 0, "Result", _target);
-        _command.DispatchCompute(RayTracingShader, 0, Mathf.CeilToInt(_target.width / 8.0f), Mathf.CeilToInt(_target.height / 8.0f), 1);
-        _command.Blit(_target, destination);
-        _command.Blit(destination, _converged);
-        Graphics.ExecuteCommandBuffer(_command);
+            // command buffer setting
+            _command.Clear();
+            _command.SetComputeTextureParam(RayTracingShader, 0, "Result", _target);
+            _command.DispatchCompute(RayTracingShader, 0, Mathf.CeilToInt(_target.width / 8.0f), Mathf.CeilToInt(_target.height / 8.0f), 1);
+            _command.Blit(_target, destination);
+            _command.Blit(destination, _converged);
+            Graphics.ExecuteCommandBuffer(_command);
+        }
+        else
+        {
+            Graphics.Blit(source, destination);
+        }
     }
 
     // Helper classes for BVH construction 10/4
