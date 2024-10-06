@@ -59,7 +59,7 @@ public class ObjFileBrowser : MonoBehaviour
         {
             // get obj child and addComponent
             obj.GetComponentInChildren<MeshFilter>().gameObject.AddComponent<RayTracingObject>();
-            Debug.Log("RayTracingMaster script added to " + obj.name);
+            //Debug.Log("RayTracingMaster script added to " + obj.name);
         }
 
         RayTracingMaster rayTracingMaster = FindObjectOfType<RayTracingMaster>();
