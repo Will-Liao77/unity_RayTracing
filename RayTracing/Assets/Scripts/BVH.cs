@@ -6,7 +6,10 @@ using Unity.Mathematics;
 using UnityEngine;
 using System.Text;
 
-// reference from https://github.com/SebLague/Ray-Tracing/blob/main/Assets/Scripts/BVH.cs#L213
+// reference from:
+// git hub: https://github.com/SebLague/Ray-Tracing/blob/main/Assets/Scripts/BVH.cs#L213
+// youtube: https://www.youtube.com/watch?v=C1H4zIiCOaI
+
 public class BVH : MonoBehaviour
 {
     public readonly NodeList _allNodes;
@@ -163,7 +166,7 @@ public class BVH : MonoBehaviour
         int numLeft = 0;
         int numRight = 0;
 
-        for (int i = 0; i < start + count; i++)
+        for (int i = start; i < start + count; i++)
         {
             BVHTriangle _tri = _allTriangles[i];
             if (_tri._centre[splitAxis] < splitPos)

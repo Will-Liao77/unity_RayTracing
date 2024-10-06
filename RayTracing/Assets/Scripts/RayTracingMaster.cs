@@ -32,8 +32,9 @@ public class RayTracingMaster : MonoBehaviour
     //private List<Texture2D> _textures = new List<Texture2D>();
 
     // BVH variables
-    private List<BvhNode> _bvhNodes = new List<BvhNode>();
-    private ComputeBuffer _BvhBuffer;
+    private BVH.Node[] _bvhNodes;
+    private ComputeBuffer _BvhNodesBuffer;
+    private ComputeBuffer _BvhTriangleBuffer;
 
     // mesh variables
     private static bool _meshObjectsNeedRebuilding = false;
@@ -94,11 +95,13 @@ public class RayTracingMaster : MonoBehaviour
     }
     private void OnDisable()
     {
-        // ? is a null-conditional operator
+        // Release mesh data buffers
         _MeshObjectBuffer?.Release();
         _VerticesBuffer?.Release();
         _IndicesBuffer?.Release();
-        _bvhNodes?.Clear();
+
+        // Release BVH
+        _BvhNodesBuffer?.Release();
     }
 
     // set parameters to compute shader
@@ -113,6 +116,12 @@ public class RayTracingMaster : MonoBehaviour
         Vector3 l = _pointLight.transform.position;
         RayTracingShader.SetVector("_PointLightPos", new Vector3(l.x, l.y, l.z));
         RayTracingShader.SetVector("_PointLightProperties", new Vector4(_pointLight.color.r, _pointLight.color.g, _pointLight.color.b, _pointLight.intensity));
+
+        // set BVH data to compute shader
+        SetComputeBuffer("_BvhNodesBuffer", _BvhNodesBuffer);
+        RayTracingShader.SetInt("_BvhNodeCount", _bvhNodes.Length);
+        SetComputeBuffer("_BvhTriangleBuffer", _BvhTriangleBuffer);
+        RayTracingShader.SetInt("_BvhTriangleCount", _bvhNodes.Length);
 
         // set mesh data to compute shader
         SetComputeBuffer("_MeshObjectBuffer", _MeshObjectBuffer);
@@ -261,6 +270,12 @@ public class RayTracingMaster : MonoBehaviour
     
         // BVH
         BVH bvh = new BVH(allVertices.ToArray(), allTriangles.ToArray(), allNormals.ToArray());
+
+        _bvhNodes = bvh.GetNodes();
+        Triangle[] allTris = bvh.GetTriangles();
+
+        CreateComputeBuffer(ref _BvhNodesBuffer, _bvhNodes.ToList(), 32);
+        CreateComputeBuffer(ref _BvhTriangleBuffer, allTris.ToList(), 72);
     }
 
     private static void CreateComputeBuffer<T>(ref ComputeBuffer buffer, List<T> data, int stride) where T : struct
@@ -311,6 +326,22 @@ public class RayTracingMaster : MonoBehaviour
             _converged = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
             _converged.enableRandomWrite = true;
             _converged.Create();
+        }
+    }
+
+    // vizualize BVH
+    void OnDrawGizmos()
+    {
+        if (_bvhNodes == null) return;
+
+        Gizmos.color = Color.green;
+
+        foreach (var node in _bvhNodes)
+        {
+            Vector3 center = (node._boundsMin + node._boundsMax) / 2;
+            Vector3 size = node._boundsMax - node._boundsMin;
+
+            Gizmos.DrawWireCube(center, size);
         }
     }
 
