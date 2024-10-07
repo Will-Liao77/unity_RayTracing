@@ -8,13 +8,13 @@ using UnityEngine.Rendering;
 
 public class RayTracingMaster : MonoBehaviour
 {
-    // public
+    // public variables
     public ComputeShader RayTracingShader;
 
     // should render flag communicate with ObjFileBrowser.cs to check if the user has loaded a file
     public bool _shouldRender = false;
 
-    // private
+    // private variables
     // Render texture
     private RenderTexture _target;
     private RenderTexture _converged;
@@ -28,9 +28,6 @@ public class RayTracingMaster : MonoBehaviour
     // point light
     private Light _pointLight;
 
-    // texture for ray tracing
-    //private List<Texture2D> _textures = new List<Texture2D>();
-
     // BVH variables
     private BVH.Node[] _bvhNodes;
     private ComputeBuffer _BvhNodesBuffer;
@@ -39,37 +36,25 @@ public class RayTracingMaster : MonoBehaviour
     // mesh variables
     private static bool _meshObjectsNeedRebuilding = false;
     private static List<RayTracingObject> _rayTracingObjects = new List<RayTracingObject>();
-    private static List<MeshObject> _meshObjects = new List<MeshObject>();
-    private static List<Vector3> _vertices = new List<Vector3>();
-    private static List<int> _indices = new List<int>();
-    private ComputeBuffer _MeshObjectBuffer;
-    private ComputeBuffer _VerticesBuffer;
-    private ComputeBuffer _IndicesBuffer;
+    private ComputeBuffer _ModelBuffer;
     private CommandBuffer _command;
+    MeshInfo[] _meshInfo;
 
-    // mesh data
-    private List<Vector3> allVertices = new List<Vector3>();
-    private List<int> allTriangles = new List<int>();
-    private List<Vector3> allNormals = new List<Vector3>();
-
-    // struct
-    struct MeshObject
+    // Structures
+    struct Matrial
     {
-        public Matrix4x4 localToWorldMatrix;
-        public int indices_offset;
-        public int indices_count;
         public Vector4 albedo;
         public Vector4 specular;
         public float smoothness;
         public Vector4 emission;
     }
-    struct BvhNode
+    struct MeshInfo
     {
-        public Vector3 min;
-        public Vector3 max;
-        public int leftChild;
-        public int rightChild;
-        public int meshObjectIndex;
+        public int nodeOffset;
+        public int triangleOffset;
+        public Matrix4x4 localToWorldMatrix;
+        public Matrix4x4 worldToLocalMatrix;
+        public Matrial material;
     }
 
     private void Start()
@@ -95,11 +80,6 @@ public class RayTracingMaster : MonoBehaviour
     }
     private void OnDisable()
     {
-        // Release mesh data buffers
-        _MeshObjectBuffer?.Release();
-        _VerticesBuffer?.Release();
-        _IndicesBuffer?.Release();
-
         // Release BVH
         _BvhNodesBuffer?.Release();
     }
@@ -119,14 +99,10 @@ public class RayTracingMaster : MonoBehaviour
 
         // set BVH data to compute shader
         SetComputeBuffer("_BvhNodesBuffer", _BvhNodesBuffer);
-        RayTracingShader.SetInt("_BvhNodeCount", _bvhNodes.Length);
         SetComputeBuffer("_BvhTriangleBuffer", _BvhTriangleBuffer);
-        RayTracingShader.SetInt("_BvhTriangleCount", _bvhNodes.Length);
 
         // set mesh data to compute shader
-        SetComputeBuffer("_MeshObjectBuffer", _MeshObjectBuffer);
-        SetComputeBuffer("_VerticesBuffer", _VerticesBuffer);
-        SetComputeBuffer("_IndicesBuffer", _IndicesBuffer);
+        SetComputeBuffer("_MeshInfoBuffer", _ModelBuffer);
     }
 
     public static void RegisterObject(RayTracingObject obj)
@@ -155,6 +131,52 @@ public class RayTracingMaster : MonoBehaviour
         _pointLight = pointLight.GetComponent<Light>();
     }
 
+    private MeshDataLists CreateAllMeshData()
+    {
+        MeshDataLists allData = new MeshDataLists();
+        Dictionary<Mesh, (int nodeOffset, int triOffset)> meshLookup = new Dictionary<Mesh, (int nodeOffset, int triOffset)>();
+
+        foreach (RayTracingObject obj in _rayTracingObjects)
+        {
+            Mesh mesh = obj.GetComponent<MeshFilter>().sharedMesh;
+
+            // cheange local to world matrix(if not changed, the result will be error)
+            Matrix4x4 localToWorldMatrix = obj.transform.localToWorldMatrix;
+
+            if (!meshLookup.ContainsKey(mesh))
+            {
+                meshLookup.Add(mesh, (allData.nodes.Count, allData.triangles.Count));
+
+                // cheange local to world matrix
+                Vector3[] worldVertices = mesh.vertices.Select(v => localToWorldMatrix.MultiplyPoint3x4(v)).ToArray();
+                Vector3[] worldNormals = mesh.normals.Select(n => localToWorldMatrix.MultiplyVector(n).normalized).ToArray();
+
+                BVH bvh = new BVH(worldVertices, mesh.triangles, worldNormals);
+                allData.triangles.AddRange(bvh.GetTriangles());
+                allData.nodes.AddRange(bvh.GetNodes());
+            }
+
+            MeshRenderer meshRenderer = obj.GetComponent<MeshRenderer>();
+            Material material = meshRenderer.sharedMaterial;
+            allData.meshInfo.Add(new MeshInfo()
+            {
+                nodeOffset = meshLookup[mesh].nodeOffset,
+                triangleOffset = meshLookup[mesh].triOffset,
+                localToWorldMatrix = obj.transform.localToWorldMatrix,
+                worldToLocalMatrix = obj.transform.worldToLocalMatrix,
+                material = new Matrial
+                {
+                    albedo = material.GetVector("_Color"),
+                    specular = material.GetVector("_SpecColor"),
+                    smoothness = material.GetFloat("_Glossiness"),
+                    emission = material.GetVector("_EmissionColor")
+                }
+            });
+        }
+
+        return allData;
+    }
+
     // Rebuild the mesh object buffers
     private void RebuildMeshObjectBuffers()
     {
@@ -165,122 +187,29 @@ public class RayTracingMaster : MonoBehaviour
 
         _meshObjectsNeedRebuilding = false;
 
-        // Clear any existing buffers
-        //_textures.Clear();
-        _meshObjects.Clear();
-        _vertices.Clear();
-        _indices.Clear();
-
         //for debug
         //int totalTriangleCount = 0;
+        //Debug.Log("Triangle count: " + totalTriangleCount);
 
-        foreach (RayTracingObject obj in _rayTracingObjects)
+        MeshDataLists allData = CreateAllMeshData();
+
+        // set mesh info
+        _meshInfo = allData.meshInfo.ToArray();
+
+        if (allData.meshInfo.Count == 0)
         {
-            Mesh mesh = obj.GetComponent<MeshFilter>().sharedMesh;
-            MeshRenderer meshRenderer = obj.GetComponent<MeshRenderer>();
-            Matrix4x4 localToWorldMatrix = obj.transform.localToWorldMatrix;
-            // mesh data(Vertices, Normals)
-            Vector3[] worldVertices = mesh.vertices.Select(v => localToWorldMatrix.MultiplyPoint3x4(v)).ToArray();
-            Vector3[] worldNormals = mesh.normals.Select(n => localToWorldMatrix.MultiplyVector(n).normalized).ToArray();
-            allVertices.AddRange(worldVertices);
-            allNormals.AddRange(worldNormals);
-
-            // Get the object's material
-            Material[] materials = meshRenderer.sharedMaterials;
-
-            for (int submesh = 0; submesh < mesh.subMeshCount; submesh++)
-            {
-                // Add vertex data
-                int firstVertex = _vertices.Count;
-
-                _vertices.AddRange(mesh.vertices);
-
-                // get and add submesh index data
-                int[] submeshIndices = mesh.GetIndices(submesh);
-
-                allTriangles.AddRange(submeshIndices);
-
-                int firstIndex = _indices.Count;
-                _indices.AddRange(submeshIndices.Select(index => index + firstVertex));
-
-                // for debug
-                // totalTriangleCount += submeshIndices.Length / 3;
-
-                // get the material properties
-                Material material = materials[Mathf.Min(submesh, materials.Length - 1)];
-
-                // init setting Texture
-                //int albedoTexID = -1;
-                //int normalTexID = -1;
-                //bool hasAlbedoTex = false;
-                //bool hasNormalTex = false;
-
-                //// check if the material has a texture assigned
-                //if (material.HasProperty("_MainTex"))
-                //{
-                //    Texture2D albedoTexture = material.GetTexture("_MainTex") as Texture2D;
-                //    if (albedoTexture != null)
-                //    {
-                //        albedoTexID = _textures.Count;
-                //        _textures.Add(albedoTexture);
-                //        hasAlbedoTex = true;
-                //    }
-                //}
-
-                //if (material.HasProperty("_BumpMap"))
-                //{
-                //    Texture2D normalTexture = material.GetTexture("_BumpMap") as Texture2D;
-                //    if (normalTexture != null)
-                //    {
-                //        normalTexID = _textures.Count;
-                //        _textures.Add(normalTexture);
-                //        hasNormalTex = true;
-                //    }
-                //}
-
-                Vector3 albedo = material.GetVector("_Color");
-                Vector3 specular = material.GetVector("_SpecColor");
-                float smoothness = material.GetFloat("_Glossiness");
-                Vector3 emission = material.GetVector("_EmissionColor");
-
-
-                // Add the object to the list
-                _meshObjects.Add(new MeshObject()
-                {
-                    localToWorldMatrix = obj.transform.localToWorldMatrix,
-                    indices_offset = firstIndex,
-                    indices_count = submeshIndices.Length,
-                    albedo = albedo,
-                    specular = specular,
-                    smoothness = smoothness,
-                    emission = emission,
-                });
-            }
-        }
-
-        if (_meshObjects.Count == 0)
-        {
-            Debug.LogWarning("No objects to trace.");
+            Debug.LogWarning("No Objects to trace.");
             return;
         }
 
-        // for debug
-        //Debug.Log("Triangle count: " + totalTriangleCount);
+        _bvhNodes = allData.nodes.ToArray();
 
-        CreateComputeBuffer(ref _MeshObjectBuffer, _meshObjects, 124);
-        CreateComputeBuffer(ref _VerticesBuffer, _vertices, 12);
-        CreateComputeBuffer(ref _IndicesBuffer, _indices, 4);
-    
-        
-        
-        // BVH
-        BVH bvh = new BVH(allVertices.ToArray(), allTriangles.ToArray(), allNormals.ToArray());
+        CreateComputeBuffer(ref _BvhNodesBuffer, allData.nodes, 32);
+        CreateComputeBuffer(ref _BvhTriangleBuffer, allData.triangles, 72);
+        CreateComputeBuffer(ref _ModelBuffer, _meshInfo.ToList(), 188);
 
-        _bvhNodes = bvh.GetNodes();
-        Triangle[] allTris = bvh.GetTriangles();
-
-        CreateComputeBuffer(ref _BvhNodesBuffer, _bvhNodes.ToList(), 32);
-        CreateComputeBuffer(ref _BvhTriangleBuffer, allTris.ToList(), 72);
+        RayTracingShader.SetInt("_BvhNodeCount", allData.nodes.Count);
+        RayTracingShader.SetInt("_BvhTriangleCount", allData.triangles.Count);
     }
 
     private static void CreateComputeBuffer<T>(ref ComputeBuffer buffer, List<T> data, int stride) where T : struct
@@ -335,20 +264,20 @@ public class RayTracingMaster : MonoBehaviour
     }
 
     // vizualize BVH
-    void OnDrawGizmos()
-    {
-        if (_bvhNodes == null) return;
+    //void OnDrawGizmos()
+    //{
+    //    if (_bvhNodes == null) return;
 
-        Gizmos.color = Color.green;
+    //    Gizmos.color = Color.green;
 
-        foreach (var node in _bvhNodes)
-        {
-            Vector3 center = (node._boundsMin + node._boundsMax) / 2;
-            Vector3 size = node._boundsMax - node._boundsMin;
+    //    foreach (var node in _bvhNodes)
+    //    {
+    //        Vector3 center = (node._boundsMin + node._boundsMax) / 2;
+    //        Vector3 size = node._boundsMax - node._boundsMin;
 
-            Gizmos.DrawWireCube(center, size);
-        }
-    }
+    //        Gizmos.DrawWireCube(center, size);
+    //    }
+    //}
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
@@ -376,5 +305,13 @@ public class RayTracingMaster : MonoBehaviour
         {
             Graphics.Blit(source, destination);
         }
+    }
+
+    // class
+    class MeshDataLists
+    {
+        public List<Triangle> triangles = new List<Triangle>();
+        public List<BVH.Node> nodes = new List<BVH.Node>();
+        public List<MeshInfo> meshInfo = new List<MeshInfo>();
     }
 }

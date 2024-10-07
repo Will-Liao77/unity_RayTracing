@@ -2,6 +2,7 @@
 #pragma kernel CSMain
 
 #define MAX_DEPTH 1
+#define NUM_SAMPLES 1
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 RWTexture2D<float4> Result;
@@ -26,6 +27,11 @@ float sdot(float3 x, float3 y, float f = 1.0f)
 float energy(float3 color)
 {
     return dot(color, 1.0f / 3.0f);
+}
+
+float2 mod2(float2 x, float2 y)
+{
+    return x - y * floor(x / y);
 }
 
 //-----------------------------------
@@ -73,7 +79,7 @@ Ray CreateCameraRay(float2 uv)
 }
 
 //-----------------------------------
-// RayHit
+// RayHit // like triangleHitInfo
 struct RayHit
 {
     float3 position;
@@ -99,90 +105,217 @@ RayHit Raycast()
 }
 
 //-----------------------------------
-// MeshStructure
-struct MeshObject
+// Structure
+struct RayTracingMaterial
 {
-    float4x4 localToWorldMatrix;
-    int indices_offset;
-    int indices_count;
-    float4 albedo;
-    float4 specular;
+    float3 albedo;
+    float3 specular;
     float smoothness;
-    float4 emission;
+    float3 emission;
 };
 
-StructuredBuffer<MeshObject> _MeshObjectBuffer;
-StructuredBuffer<float3> _VerticesBuffer;
-StructuredBuffer<int> _IndicesBuffer;
+struct MeshInfo
+{
+    int nodeOffset;
+    int triangleOffset;
+    float4x4 Matrix4x4localToWorldMatrix;
+    float4x4 Matrix4x4worldToLocalMatrix;
+    RayTracingMaterial material;
+};
+
+struct TriangleHitInfo
+{
+    bool isHit;
+    float distance;
+    float3 hitPosition;
+    float3 hitNormal;
+    int triIndex;
+};
+
+struct BVHNode
+{
+    float3 boundsMin;
+    float3 boundsMax;
+    int startIndex;
+    int triangleCount;
+};
+
+struct Triangle
+{
+    float3 posA, posB, posC;
+    float3 normA, normB, normC;
+};
+
+struct ModelHitInfo
+{
+    bool isHit;
+    float3 normal;
+    float3 hitPoint;
+    float distance;
+    RayTracingMaterial material;
+};
+
+// create Buffers
+StructuredBuffer<BVHNode> _BvhNodesBuffer;
+StructuredBuffer<Triangle> _BvhTriangleBuffer;
+StructuredBuffer<MeshInfo> _MeshInfoBuffer;
 
 //-----------------------------------
 // Intersection
-// calculate the intersection pf a ray with a triangle using the Moller-Trumbore algorithm
-bool IntersectTriangle(Ray ray, float3 vert0, float3 vert1, float3 vert2,
-	inout float t, inout float u, inout float v)
+// calculate the intersection of a ray with a triangle using the Moller-Trumbore algorithm
+TriangleHitInfo IntersectTriangle(Ray ray, Triangle tri, inout float t, inout float u, inout float v)
 {
     // find vectors for two edges sharing vert0
-    float3 edge1 = vert1 - vert0;
-    float3 edge2 = vert2 - vert0;
+    float3 edge1 = tri.posB - tri.posA;
+    float3 edge2 = tri.posC - tri.posA;
     
     // begin calculating determinant - also used to calculate U parameter
     float3 pvec = cross(ray.direction, edge2);
     
     // if determinant is near zero, ray lies in plane of triangle
     float det = dot(edge1, pvec);
-    if (abs(det) < EPSILON)
-        return false;
+    //if (abs(det) < EPSILON)
+    //    return false;
     float invDet = 1.0f / det;
     
     // calculate distance from vert0 to ray origin
-    float3 tvec = ray.origin - vert0;
+    float3 tvec = ray.origin - tri.posA;
     
     // calculate U parameter and test bounds
     u = dot(tvec, pvec) * invDet;
-    if (u < 0.0f || u > 1.0f)
-        return false;
+    //if (u < 0.0f || u > 1.0f)
+    //    return false;
     
     // prepare to test V parameter
     float3 qvec = cross(tvec, edge1);
     
     // calculate V parameter and test bounds
     v = dot(ray.direction, qvec) * invDet;
-    if (v < 0.0f || u + v > 1.0f)
-        return false;
+    //if (v < 0.0f || u + v > 1.0f)
+    //    return false;
     
-    // calculate t, ray intersects triangle
+    // calculate W
+    float w = 1 - u - v;
+    
+    // calculate distance, ray intersects triangle
     t = dot(edge2, qvec) * invDet;
-    return t > EPSILON;
+    //return t > EPSILON;
+    
+    TriangleHitInfo hitInfo;
+    hitInfo.isHit = det >= EPSILON && t >= 0 && u >= 0 && v >= 0 && w >= 0;
+    hitInfo.distance = t;
+    hitInfo.hitPosition = ray.origin + t * ray.direction;
+    //hitInfo.hitNormal = normalize(w * tri.normA + u * tri.normB + v * tri.normC);
+    hitInfo.hitNormal = normalize(cross(edge1, edge2));
+    
+    return hitInfo;
 }
 
-// intersect all triangles of a mesh objects with a ray(slow)
-void IntersectMeshObject(Ray ray, inout RayHit bestHit, MeshObject meshObject)
+float RayBoundingBoxDistance(Ray ray, float3 boxMin, float3 boxMax)
 {
-    uint offset = meshObject.indices_offset;
-    uint count = offset + meshObject.indices_count;
-    for (uint i = offset; i < count; i += 3)
+    // get ray inverse direction
+    float3 rayInvDir = 1.0f / ray.direction;    
+    
+    float3 distanceMin = (boxMin - ray.origin) * rayInvDir;
+    float3 distanceMax = (boxMax - ray.origin) * rayInvDir;
+    float3 distance1 = min(distanceMin, distanceMax);
+    float3 distance2 = max(distanceMin, distanceMax);
+    float distaceNear = max(max(distance1.x, distance1.y), distance1.z);
+    float distaceFar = min(min(distance2.x, distance2.y), distance2.z);
+    
+    bool hit = distaceFar >= distaceNear && distaceFar >= 0;
+    float distance = hit ? distaceNear > 0 ? distaceNear : 0 : 1.#INF;
+    return distance;
+}
+
+TriangleHitInfo RayTriangleBVH(Ray ray, float rayLength, int nodeOffset, int triOffset, inout int2 stats)
+{
+    TriangleHitInfo result;
+    result.distance = rayLength;
+    result.triIndex = -1;
+    
+    // BVH max depth is set to 32
+    int stack[32];
+    int stackIndex = 0;
+    stack[stackIndex++] = nodeOffset + 0;
+    
+    while (stackIndex > 0)
     {
-        float3 v0 = (mul(meshObject.localToWorldMatrix, float4(_VerticesBuffer[_IndicesBuffer[i]], 1.0f))).xyz;
-        float3 v1 = (mul(meshObject.localToWorldMatrix, float4(_VerticesBuffer[_IndicesBuffer[i + 1]], 1.0f))).xyz;
-        float3 v2 = (mul(meshObject.localToWorldMatrix, float4(_VerticesBuffer[_IndicesBuffer[i + 2]], 1.0f))).xyz;
+        BVHNode node = _BvhNodesBuffer[stack[--stackIndex]];
+        bool isLeaf = node.triangleCount > 0;
         
-        float t, u, v;
-        if (IntersectTriangle(ray, v0, v1, v2, t, u, v))
+        if (isLeaf)
         {
-            if (t < bestHit.distance)
+            for (int i = 0; i < node.triangleCount; i++)
             {
-                bestHit.distance = t;
-                bestHit.position = ray.origin + t * ray.direction;
-                bestHit.normal = normalize(cross(v1 - v0, v2 - v0));
-                bestHit.albedo = meshObject.albedo.xyz;
-                //bestHit.albedo = 1.0f;
-                bestHit.specular = meshObject.specular.xyz;
-                bestHit.smoothness = meshObject.smoothness;
-                bestHit.emission = meshObject.emission.xyz;
+                Triangle tri = _BvhTriangleBuffer[triOffset + node.startIndex + i];
+                float t, u, v;
+                TriangleHitInfo triHitInfo = IntersectTriangle(ray, tri, t, u, v);
+                stats[0]++; // count triangle intersection tests
                 
+                if (triHitInfo.isHit && triHitInfo.distance < result.distance)
+                {
+                    result = triHitInfo;
+                    result.triIndex = node.startIndex + i;
+                }
+            }
+        }
+        else
+        {
+            int childIndexA = nodeOffset + node.startIndex + 0;
+            int childIndexB = nodeOffset + node.startIndex + 1;
+            BVHNode childA = _BvhNodesBuffer[childIndexA];
+            BVHNode childB = _BvhNodesBuffer[childIndexB];
+            
+            float distanceA  = RayBoundingBoxDistance(ray, childA.boundsMin, childA.boundsMax);
+            float distanceB  = RayBoundingBoxDistance(ray, childB.boundsMin, childB.boundsMax);
+            stats[1]++;
+            
+            bool isNearestA = distanceA <= distanceB;
+            float distanceNear = isNearestA ? distanceA : distanceB;
+            float distanceFar = isNearestA ? distanceB : distanceA;
+            int childIndexNear = isNearestA ? childIndexA : childIndexB;
+            int childIndexFar = isNearestA ? childIndexB : childIndexA;
+            
+            if (distanceFar < result.distance)
+            {
+                stack[stackIndex++] = childIndexFar;
+            }
+            if (distanceNear < result.distance)
+            {
+                stack[stackIndex++] = childIndexNear;
             }
         }
     }
+    return result;
+}
+
+ModelHitInfo CalculateRayCollision(Ray worldRay, out int2 stats)
+{
+    ModelHitInfo result;
+    result.distance = 1.#INF;
+    Ray localRay;
+    
+    MeshInfo mesh = _MeshInfoBuffer[0];
+    
+    localRay.origin = mul(mesh.Matrix4x4localToWorldMatrix, float4(worldRay.origin, 1));
+    localRay.direction = mul(mesh.Matrix4x4localToWorldMatrix, float4(worldRay.direction, 0));
+    
+    float3 localRayInvDir = 1.0f / localRay.direction;
+    
+    TriangleHitInfo hit = RayTriangleBVH(localRay, result.distance, mesh.nodeOffset, mesh.triangleOffset, stats);
+    
+    if (hit.distance < result.distance)
+    {
+        result.isHit = true;
+        result.distance = hit.distance;
+        result.hitPoint = mul(mesh.Matrix4x4localToWorldMatrix, float4(hit.hitNormal, 0)).xyz;
+        result.normal = worldRay.origin + worldRay.direction * hit.distance;
+        result.material = mesh.material;
+    
+    }
+    
+    return result;
 }
 
 //-----------------------------------
@@ -214,19 +347,23 @@ float3 SampleHemisphere(float3 normal, float alpha)
 
 //-----------------------------------
 // Trace
-RayHit TraceRay(Ray ray)
-{
-    RayHit bestHit = Raycast();
-    uint count, stride, i;
-    
-    // Trace mesh objects
-    _MeshObjectBuffer.GetDimensions(count, stride);
-    for (i = 0; i < count; i++)
-    {
-        IntersectMeshObject(ray, bestHit, _MeshObjectBuffer[i]);
-    }
 
-    return bestHit;
+float3 Trace(Ray ray)
+{
+    
+    int2 stats = int2(0, 0); // Initialize stats if needed
+    ModelHitInfo hitInfo = CalculateRayCollision(ray, stats);
+    
+    if (hitInfo.isHit)
+    {
+        // Return the normal of the hit triangle
+        return hitInfo.normal;
+    }
+    else
+    {
+        // If no hit, return a default color (e.g., sky color)
+        return float3(0.0f, 0.0f, 0.0f); // Light blue color
+    }
 }
 
 //-----------------------------------
@@ -234,87 +371,6 @@ RayHit TraceRay(Ray ray)
 float SmoothnessToPhongAlpha(float s)
 {
     return pow(1000.0f, s * s);
-}
-
-float3 Shade(inout Ray ray, RayHit hit)
-{
-    //if (hit.distance < 1.#INF)
-    //{
-    //    // Calculate chances of diffuse and specular reflection
-    //    hit.albedo = min(1.0f - hit.specular, hit.albedo);
-    //    float specChance = energy(hit.specular);
-    //    float diffChance = energy(hit.albedo);
-
-    //    float3 color = hit.albedo * 0.1f;
-        
-    //    color += hit.emission;
-
-    //    // Roulette-select the ray's path
-    //    float roulette = rand();
-    //    if (roulette < specChance)
-    //    {
-    //        // Specular reflection
-    //        ray.origin = hit.position + hit.normal * 0.001f;
-    //        float alpha = SmoothnessToPhongAlpha(hit.smoothness);
-    //        ray.direction = SampleHemisphere(reflect(ray.direction, hit.normal), alpha);
-    //        float f = (alpha + 2) / (alpha + 1);
-    //        ray.energy *= (1.0f / specChance) * hit.specular * sdot(hit.normal, ray.direction, f);
-    //    }
-    //    else if (diffChance > 0 && roulette < specChance + diffChance)
-    //    {
-    //        // Diffuse reflection
-    //        ray.origin = hit.position + hit.normal * 0.001f;
-    //        ray.direction = SampleHemisphere(hit.normal, 1.0f);
-    //        ray.energy *= (1.0f / diffChance) * hit.albedo;
-    //    }
-    //    else
-    //    {
-    //        // Terminate ray
-    //        ray.energy = 0.0f;
-    //    }
-
-    //    return color;
-    //}
-    //else
-    //{
-    //    return float3(0.0f, 0.0f, 0.0f);
-    //}
-    
-    // Calculate the lighting
-    if (hit.distance < 1.#INF)
-    {
-        float3 lightDir = normalize(_PointLightPos.xyz - hit.position);
-        float3 lightDistance = length(_PointLightPos.xyz - hit.position);
-        float3 normal = -hit.normal * 0.5 + 0.5;
-        
-        // diffuse
-        float diffuse = max(dot(normal, lightDir), 0.0f);
-        float3 diffuseColor = hit.albedo * diffuse;
-        
-        float attenuation = 1.0 / (1.0 + 0.09 * lightDistance + 0.032 * (lightDistance * lightDistance));
-
-        float3 ambient = 0.1f * hit.albedo;
-        
-        float3 lightColor = (_PointLightProperties.x * _PointLightProperties.w) + (_PointLightProperties.y * _PointLightProperties.w) + (_PointLightProperties.z * _PointLightProperties.w);
-        
-        float3 color = ambient * (diffuseColor) * lightColor * attenuation + hit.emission;
-
-        return color;
-    }
-    else
-    {
-        return float3(0.0f, 0.0f, 0.0f);
-    }
-    
-    if (hit.distance < 1.#INF)
-    {
-        // add - cause the normal is in the wrong direction
-        return -hit.normal * 0.5 + 0.5;
-    }
-    else
-    {
-        return float3(0.0f, 0.0f, 0.0f);
-    }
 }
 
 //-----------------------------------
@@ -334,18 +390,12 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     Ray ray = CreateCameraRay(uv);
     
     // Trace and shade
-    //RayHit hit = TraceRay(ray);
-    //Result[id.xy] = float4(Shade(ray, hit), 1.0f);
     float3 result = float3(0.0f, 0.0f, 0.0f);
-    for (int i = 0; i < MAX_DEPTH; i++)
+    for (int i = 0; i < NUM_SAMPLES; i++)
     {
-        RayHit hit = TraceRay(ray);
-        result += ray.energy * Shade(ray, hit);
-        
-        if (!any(ray.energy))
-        {
-            break;
-        }
+
+        result += Trace(ray);
     }
+    
     Result[id.xy] = float4(result, 1.0f);
 }
