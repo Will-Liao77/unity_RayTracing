@@ -178,10 +178,12 @@ public class RayTracingMaster : MonoBehaviour
         {
             Mesh mesh = obj.GetComponent<MeshFilter>().sharedMesh;
             MeshRenderer meshRenderer = obj.GetComponent<MeshRenderer>();
-
+            Matrix4x4 localToWorldMatrix = obj.transform.localToWorldMatrix;
             // mesh data(Vertices, Normals)
-            allVertices.AddRange(mesh.vertices);
-            allNormals.AddRange(mesh.normals);
+            Vector3[] worldVertices = mesh.vertices.Select(v => localToWorldMatrix.MultiplyPoint3x4(v)).ToArray();
+            Vector3[] worldNormals = mesh.normals.Select(n => localToWorldMatrix.MultiplyVector(n).normalized).ToArray();
+            allVertices.AddRange(worldVertices);
+            allNormals.AddRange(worldNormals);
 
             // Get the object's material
             Material[] materials = meshRenderer.sharedMaterials;
@@ -190,6 +192,7 @@ public class RayTracingMaster : MonoBehaviour
             {
                 // Add vertex data
                 int firstVertex = _vertices.Count;
+
                 _vertices.AddRange(mesh.vertices);
 
                 // get and add submesh index data
@@ -268,6 +271,8 @@ public class RayTracingMaster : MonoBehaviour
         CreateComputeBuffer(ref _VerticesBuffer, _vertices, 12);
         CreateComputeBuffer(ref _IndicesBuffer, _indices, 4);
     
+        
+        
         // BVH
         BVH bvh = new BVH(allVertices.ToArray(), allTriangles.ToArray(), allNormals.ToArray());
 
