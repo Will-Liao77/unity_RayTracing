@@ -174,8 +174,6 @@ TriangleHitInfo IntersectTriangle(Ray ray, Triangle tri, inout float t, inout fl
     
     // if determinant is near zero, ray lies in plane of triangle
     float det = dot(edge1, pvec);
-    //if (abs(det) < EPSILON)
-    //    return false;
     float invDet = 1.0f / det;
     
     // calculate distance from vert0 to ray origin
@@ -183,23 +181,18 @@ TriangleHitInfo IntersectTriangle(Ray ray, Triangle tri, inout float t, inout fl
     
     // calculate U parameter and test bounds
     u = dot(tvec, pvec) * invDet;
-    //if (u < 0.0f || u > 1.0f)
-    //    return false;
-    
+
     // prepare to test V parameter
     float3 qvec = cross(tvec, edge1);
     
     // calculate V parameter and test bounds
     v = dot(ray.direction, qvec) * invDet;
-    //if (v < 0.0f || u + v > 1.0f)
-    //    return false;
     
     // calculate W
     float w = 1 - u - v;
     
     // calculate distance, ray intersects triangle
     t = dot(edge2, qvec) * invDet;
-    //return t > EPSILON;
     
     TriangleHitInfo hitInfo;
     hitInfo.isHit = det >= EPSILON && t >= 0 && u >= 0 && v >= 0 && w >= 0;
@@ -211,6 +204,7 @@ TriangleHitInfo IntersectTriangle(Ray ray, Triangle tri, inout float t, inout fl
     return hitInfo;
 }
 
+// interserct AABB
 float RayBoundingBoxDistance(Ray ray, float3 boxMin, float3 boxMax)
 {
     // get ray inverse direction
@@ -298,8 +292,8 @@ ModelHitInfo CalculateRayCollision(Ray worldRay, out int2 stats)
     
     MeshInfo mesh = _MeshInfoBuffer[0];
     
-    localRay.origin = mul(mesh.Matrix4x4localToWorldMatrix, float4(worldRay.origin, 1));
-    localRay.direction = mul(mesh.Matrix4x4localToWorldMatrix, float4(worldRay.direction, 0));
+    localRay.origin = mul(mesh.Matrix4x4worldToLocalMatrix, float4(worldRay.origin, 0));
+    localRay.direction = mul(mesh.Matrix4x4worldToLocalMatrix, float4(worldRay.direction, 1));
     
     float3 localRayInvDir = 1.0f / localRay.direction;
     
@@ -309,8 +303,8 @@ ModelHitInfo CalculateRayCollision(Ray worldRay, out int2 stats)
     {
         result.isHit = true;
         result.distance = hit.distance;
-        result.hitPoint = mul(mesh.Matrix4x4localToWorldMatrix, float4(hit.hitNormal, 0)).xyz;
-        result.normal = worldRay.origin + worldRay.direction * hit.distance;
+        result.hitPoint = mul(mesh.Matrix4x4localToWorldMatrix, float4(hit.hitPosition, 0)).xyz;
+        result.normal = normalize(mul(transpose(mesh.Matrix4x4worldToLocalMatrix), float4(hit.hitNormal, 0)).xyz);
         result.material = mesh.material;
     
     }
@@ -357,7 +351,7 @@ float3 Trace(Ray ray)
     if (hitInfo.isHit)
     {
         // Return the normal of the hit triangle
-        return hitInfo.normal;
+        return (hitInfo.normal * 0.5f) + 0.5f;
     }
     else
     {
@@ -391,11 +385,11 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     
     // Trace and shade
     float3 result = float3(0.0f, 0.0f, 0.0f);
-    for (int i = 0; i < NUM_SAMPLES; i++)
-    {
+    //for (int i = 0; i < NUM_SAMPLES; i++)
+    //{
 
-        result += Trace(ray);
-    }
+    result += Trace(ray);
+    //}
     
     Result[id.xy] = float4(result, 1.0f);
 }
