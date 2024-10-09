@@ -48,7 +48,8 @@ public class BVH : MonoBehaviour
         _allNodes.Add(new Node(bounds));
         Split(0, verts, 0, _allTriangles.Length);
 
-        _allTris = new Triangle[indices.Length];
+        // _allTris = new Triangle[indices.Length];
+        _allTris = new Triangle[_allTriangles.Length];
 
         // debug
         //Debug.Log(_allTriangles.Length); // sibenik 75284 triangles
@@ -72,14 +73,16 @@ public class BVH : MonoBehaviour
 
     void Split(int parentIndex, Vector3[] verts, int triGlobalStart, int triNum, int depth = 0)
     {
-        const int MaxDepth = 32;
+        const int MaxDepth = 20;
+        const int MinTris = 4;
         Node parent = _allNodes._nodes[parentIndex];
         Vector3 size = parent.CalcuateBoundSize();
         float parentCost = NodeCost(size, triNum);
 
         (int splitAxis, float splitPos, float cost) = ChooseSplit(parent, triGlobalStart, triNum);
 
-        if (cost < parentCost && depth < MaxDepth)
+        // set min tris 10/09
+        if (cost < parentCost && depth < MaxDepth && triNum > MinTris * 2)
         {
             BoundingBox boundsLeft = new();
             BoundingBox boundsRight = new();
@@ -103,21 +106,51 @@ public class BVH : MonoBehaviour
             }
 
             int numOnRight = triNum - numOnLeft;
-            int triStartLeft = triGlobalStart + 0;
-            int triStartRight = triGlobalStart + numOnLeft;
+            //int triStartLeft = triGlobalStart + 0;
+            //int triStartRight = triGlobalStart + numOnLeft;
 
-            // split parent into two children
-            int childLeftIndex = _allNodes.Add(new Node(boundsLeft, triStartLeft, numOnLeft));
-            int childRightIndex = _allNodes.Add(new Node(boundsRight, triStartRight, numOnRight));
+            //// split parent into two children
+            ////int childLeftIndex = _allNodes.Add(new Node(boundsLeft, triStartLeft, numOnLeft));
+            ////int childRightIndex = _allNodes.Add(new Node(boundsRight, triStartRight, numOnRight));
+            //int childLeftIndex = _allNodes.Add(new(boundsLeft, triStartLeft, 0));
+            //int childRightIndex = _allNodes.Add(new(boundsRight, triStartRight, 0));
 
-            // update parent
-            parent._startIndex = childLeftIndex;
-            _allNodes._nodes[parentIndex] = parent;
-            status.RecordNode(depth, false);
+            //// update parent
+            //parent._startIndex = childLeftIndex;
+            //_allNodes._nodes[parentIndex] = parent;
+            //status.RecordNode(depth, false);
 
-            // recursive split children
-            Split(childLeftIndex, verts, triGlobalStart, numOnLeft, depth + 1);
-            Split(childRightIndex, verts, triGlobalStart + numOnLeft, numOnRight, depth + 1);
+            //// recursive split children
+            //Split(childLeftIndex, verts, triGlobalStart, numOnLeft, depth + 1);
+            //Split(childRightIndex, verts, triGlobalStart + numOnLeft, numOnRight, depth + 1);
+
+            // set min tris 10/09
+            if (numOnLeft >= MinTris && numOnRight >= MinTris)
+            {
+                int triStartLeft = triGlobalStart + 0;
+                int triStartRight = triGlobalStart + numOnLeft;
+
+                // split parent into two children
+                int childLeftIndex = _allNodes.Add(new(boundsLeft, triStartLeft, 0));
+                int childRightIndex = _allNodes.Add(new(boundsRight, triStartRight, 0));
+
+                // update parent
+                parent._startIndex = childLeftIndex;
+                _allNodes._nodes[parentIndex] = parent;
+                status.RecordNode(depth, false);
+
+                // recursive split children
+                Split(childLeftIndex, verts, triGlobalStart, numOnLeft, depth + 1);
+                Split(childRightIndex, verts, triGlobalStart + numOnLeft, numOnRight, depth + 1);
+            }
+            else
+            {
+                // parent is a leaf, assign all triangle to it
+                parent._startIndex = triGlobalStart;
+                parent._triangleCount = triNum;
+                _allNodes._nodes[parentIndex] = parent;
+                status.RecordNode(depth, true, triNum);
+            }
         }
         else
         {

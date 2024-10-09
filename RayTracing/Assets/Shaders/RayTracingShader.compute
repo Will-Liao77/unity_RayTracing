@@ -198,8 +198,7 @@ TriangleHitInfo IntersectTriangle(Ray ray, Triangle tri, inout float t, inout fl
     hitInfo.isHit = det >= EPSILON && t >= 0 && u >= 0 && v >= 0 && w >= 0;
     hitInfo.distance = t;
     hitInfo.hitPosition = ray.origin + t * ray.direction;
-    //hitInfo.hitNormal = normalize(w * tri.normA + u * tri.normB + v * tri.normC);
-    hitInfo.hitNormal = normalize(cross(edge1, edge2));
+    hitInfo.hitNormal = normalize(w * tri.normA + u * tri.normB + v * tri.normC);
     
     return hitInfo;
 }
@@ -217,8 +216,9 @@ float RayBoundingBoxDistance(Ray ray, float3 boxMin, float3 boxMax)
     float distaceNear = max(max(distance1.x, distance1.y), distance1.z);
     float distaceFar = min(min(distance2.x, distance2.y), distance2.z);
     
-    bool hit = distaceFar >= distaceNear && distaceFar >= 0;
+    bool hit = distaceFar >= distaceNear && distaceFar > 0;
     float distance = hit ? distaceNear > 0 ? distaceNear : 0 : 1.#INF;
+
     return distance;
 }
 
@@ -228,8 +228,8 @@ TriangleHitInfo RayTriangleBVH(Ray ray, float rayLength, int nodeOffset, int tri
     result.distance = rayLength;
     result.triIndex = -1;
     
-    // BVH max depth is set to 32
-    int stack[32];
+    // BVH max depth is set to 20
+    int stack[20];
     int stackIndex = 0;
     stack[stackIndex++] = nodeOffset + 0;
     
@@ -258,12 +258,13 @@ TriangleHitInfo RayTriangleBVH(Ray ray, float rayLength, int nodeOffset, int tri
         {
             int childIndexA = nodeOffset + node.startIndex + 0;
             int childIndexB = nodeOffset + node.startIndex + 1;
+            
             BVHNode childA = _BvhNodesBuffer[childIndexA];
             BVHNode childB = _BvhNodesBuffer[childIndexB];
             
             float distanceA  = RayBoundingBoxDistance(ray, childA.boundsMin, childA.boundsMax);
             float distanceB  = RayBoundingBoxDistance(ray, childB.boundsMin, childB.boundsMax);
-            stats[1]++;
+            stats[1] += 2;
             
             bool isNearestA = distanceA <= distanceB;
             float distanceNear = isNearestA ? distanceA : distanceB;
@@ -284,27 +285,21 @@ TriangleHitInfo RayTriangleBVH(Ray ray, float rayLength, int nodeOffset, int tri
     return result;
 }
 
-ModelHitInfo CalculateRayCollision(Ray worldRay, out int2 stats)
+ModelHitInfo CalculateRayCollision(Ray ray, out int2 stats)
 {
     ModelHitInfo result;
     result.distance = 1.#INF;
-    Ray localRay;
-    
     MeshInfo mesh = _MeshInfoBuffer[0];
     
-    localRay.origin = mul(mesh.Matrix4x4worldToLocalMatrix, float4(worldRay.origin, 0));
-    localRay.direction = mul(mesh.Matrix4x4worldToLocalMatrix, float4(worldRay.direction, 1));
-    
-    float3 localRayInvDir = 1.0f / localRay.direction;
-    
-    TriangleHitInfo hit = RayTriangleBVH(localRay, result.distance, mesh.nodeOffset, mesh.triangleOffset, stats);
+    TriangleHitInfo hit = RayTriangleBVH(ray, result.distance, mesh.nodeOffset, mesh.triangleOffset, stats);
     
     if (hit.distance < result.distance)
     {
         result.isHit = true;
         result.distance = hit.distance;
-        result.hitPoint = mul(mesh.Matrix4x4localToWorldMatrix, float4(hit.hitPosition, 0)).xyz;
+        result.hitPoint = ray.origin + ray.direction * hit.distance;
         result.normal = normalize(mul(transpose(mesh.Matrix4x4worldToLocalMatrix), float4(hit.hitNormal, 0)).xyz);
+        //result.normal = hit.hitNormal;
         result.material = mesh.material;
     
     }
@@ -385,11 +380,11 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     
     // Trace and shade
     float3 result = float3(0.0f, 0.0f, 0.0f);
-    //for (int i = 0; i < NUM_SAMPLES; i++)
-    //{
+    for (int i = 0; i < NUM_SAMPLES; i++)
+    {
 
-    result += Trace(ray);
-    //}
+        result += Trace(ray);
+    }
     
     Result[id.xy] = float4(result, 1.0f);
 }

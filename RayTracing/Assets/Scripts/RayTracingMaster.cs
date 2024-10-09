@@ -154,6 +154,9 @@ public class RayTracingMaster : MonoBehaviour
                 BVH bvh = new BVH(worldVertices, mesh.triangles, worldNormals);
                 allData.triangles.AddRange(bvh.GetTriangles());
                 allData.nodes.AddRange(bvh.GetNodes());
+
+                // debug bvh status
+                Debug.Log($"otuput+{bvh.status.ToString()}");
             }
 
             MeshRenderer meshRenderer = obj.GetComponent<MeshRenderer>();
@@ -256,7 +259,7 @@ public class RayTracingMaster : MonoBehaviour
             _target.enableRandomWrite = true;
             _target.Create();
 
-            // convered for waht?
+            // convered
             _converged = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
             _converged.enableRandomWrite = true;
             _converged.Create();
@@ -264,20 +267,20 @@ public class RayTracingMaster : MonoBehaviour
     }
 
     // vizualize BVH
-    //void OnDrawGizmos()
-    //{
-    //    if (_bvhNodes == null) return;
+    void OnDrawGizmos()
+    {
+        if (_bvhNodes == null) return;
 
-    //    Gizmos.color = Color.green;
+        Gizmos.color = Color.green;
 
-    //    foreach (var node in _bvhNodes)
-    //    {
-    //        Vector3 center = (node._boundsMin + node._boundsMax) / 2;
-    //        Vector3 size = node._boundsMax - node._boundsMin;
+        foreach (var node in _bvhNodes)
+        {
+            Vector3 center = (node._boundsMin + node._boundsMax) / 2;
+            Vector3 size = node._boundsMax - node._boundsMin;
 
-    //        Gizmos.DrawWireCube(center, size);
-    //    }
-    //}
+            Gizmos.DrawWireCube(center, size);
+        }
+    }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
