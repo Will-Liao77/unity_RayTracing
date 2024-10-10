@@ -2,6 +2,7 @@
 #pragma kernel CSMain
 
 #define MAX_DEPTH 1
+#define NUM_PER_PIXEL 1
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 RWTexture2D<float4> Result;
@@ -12,6 +13,13 @@ float2 _PixelOffset;
 // light data
 float3 _PointLightPos;
 float4 _PointLightProperties;
+
+// texture
+int _TextureCount;
+int _MaxTextureHeight;
+int _MaxTextureWidth;
+SamplerState sampler_TextureArray;
+Texture2DArray _Texture2DArray;
 
 static const float PI = 3.14159265f;
 static const float EPSILON = 1e-6;
@@ -45,15 +53,13 @@ struct Ray
 {
     float3 origin;
     float3 direction;
-    float3 energy;
 };
 
 Ray CreateRay(float3 origin, float3 direction)
 {
     Ray ray;
     ray.origin = origin;
-    ray.direction = direction;
-    ray.energy = float3(1.0f, 1.0f, 1.0f);
+    ray.direction = normalize(direction);
     return ray;
 }
 
@@ -109,11 +115,26 @@ struct MeshObject
     float4 specular;
     float smoothness;
     float4 emission;
+    int textureIndex;
+    float4 textureST;
 };
 
 StructuredBuffer<MeshObject> _MeshObjectBuffer;
 StructuredBuffer<float3> _VerticesBuffer;
 StructuredBuffer<int> _IndicesBuffer;
+
+float3 SampleAlbedo(MeshObject meshObject, float2 uv)
+{
+    if (meshObject.textureIndex >= 0 && meshObject.textureIndex < _TextureCount)
+    {
+        float2 scaledUV = uv * meshObject.textureST.xy + meshObject.textureST.zw;
+        //return _Texture2DArray.SampleLevel(sampler_TextureArray, float3(scaledUV, meshObject.textureIndex), 0).rgb;
+        return _Texture2DArray.Load(int4(scaledUV * float2(_MaxTextureWidth, _MaxTextureHeight), meshObject.textureIndex, 0)).rgb;
+    }else
+    {
+        return meshObject.albedo.rgb;    
+    }
+}
 
 //-----------------------------------
 // Intersection
@@ -149,7 +170,7 @@ bool IntersectTriangle(Ray ray, float3 vert0, float3 vert1, float3 vert2,
     v = dot(ray.direction, qvec) * invDet;
     if (v < 0.0f || u + v > 1.0f)
         return false;
-    
+        
     // calculate t, ray intersects triangle
     t = dot(edge2, qvec) * invDet;
     return t > EPSILON;
@@ -174,7 +195,11 @@ void IntersectMeshObject(Ray ray, inout RayHit bestHit, MeshObject meshObject)
                 bestHit.distance = t;
                 bestHit.position = ray.origin + t * ray.direction;
                 bestHit.normal = normalize(cross(v1 - v0, v2 - v0));
-                bestHit.albedo = meshObject.albedo.xyz;
+                //bestHit.normal = normalize(w * v0 + u * v1 + v * v2);
+                float w = 1.0f - u - v;
+                float2 uv = w * float2(0, 0) + u * float2(1, 0) + v * float2(0, 1);
+                bestHit.albedo = SampleAlbedo(meshObject, uv);
+                //bestHit.albedo = meshObject.albedo.xyz;
                 //bestHit.albedo = 1.0f;
                 bestHit.specular = meshObject.specular.xyz;
                 bestHit.smoothness = meshObject.smoothness;
@@ -187,29 +212,14 @@ void IntersectMeshObject(Ray ray, inout RayHit bestHit, MeshObject meshObject)
 
 //-----------------------------------
 // Sampling
-float3x3 GetTangentSpace(float3 normal)
+float3 RandomDirectin()
 {
-    // Choose a helper vector for the cross product
-    float3 helper = float3(1, 0, 0);
-    if (abs(normal.x) > 0.99f)
-        helper = float3(0, 0, 1);
-
-    // Generate vectors
-    float3 tangent = normalize(cross(normal, helper));
-    float3 binormal = normalize(cross(normal, tangent));
-    return float3x3(tangent, binormal, normal);
-}
-
-float3 SampleHemisphere(float3 normal, float alpha)
-{
-    // Sample the hemisphere, where alpha determines the kind of the sampling
-    float cosTheta = pow(rand(), 1.0f / (alpha + 1.0f));
-    float sinTheta = sqrt(1.0f - cosTheta * cosTheta);
-    float phi = 2 * PI * rand();
-    float3 tangentSpaceDir = float3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
-
-    // Transform direction to world space
-    return mul(tangentSpaceDir, GetTangentSpace(normal));
+    float z = rand() * 2.0f - 1.0f;
+    float a = rand() * 2.0f * PI;
+    float r= sqrt(1.0f - z * z);
+    float x = r * cos(a);
+    float y = r * sin(a);
+    return float3(x, y, z);
 }
 
 //-----------------------------------
@@ -231,61 +241,14 @@ RayHit TraceRay(Ray ray)
 
 //-----------------------------------
 // Shade
-float SmoothnessToPhongAlpha(float s)
-{
-    return pow(1000.0f, s * s);
-}
-
 float3 Shade(inout Ray ray, RayHit hit)
 {
-    //if (hit.distance < 1.#INF)
-    //{
-    //    // Calculate chances of diffuse and specular reflection
-    //    hit.albedo = min(1.0f - hit.specular, hit.albedo);
-    //    float specChance = energy(hit.specular);
-    //    float diffChance = energy(hit.albedo);
-
-    //    float3 color = hit.albedo * 0.1f;
-        
-    //    color += hit.emission;
-
-    //    // Roulette-select the ray's path
-    //    float roulette = rand();
-    //    if (roulette < specChance)
-    //    {
-    //        // Specular reflection
-    //        ray.origin = hit.position + hit.normal * 0.001f;
-    //        float alpha = SmoothnessToPhongAlpha(hit.smoothness);
-    //        ray.direction = SampleHemisphere(reflect(ray.direction, hit.normal), alpha);
-    //        float f = (alpha + 2) / (alpha + 1);
-    //        ray.energy *= (1.0f / specChance) * hit.specular * sdot(hit.normal, ray.direction, f);
-    //    }
-    //    else if (diffChance > 0 && roulette < specChance + diffChance)
-    //    {
-    //        // Diffuse reflection
-    //        ray.origin = hit.position + hit.normal * 0.001f;
-    //        ray.direction = SampleHemisphere(hit.normal, 1.0f);
-    //        ray.energy *= (1.0f / diffChance) * hit.albedo;
-    //    }
-    //    else
-    //    {
-    //        // Terminate ray
-    //        ray.energy = 0.0f;
-    //    }
-
-    //    return color;
-    //}
-    //else
-    //{
-    //    return float3(0.0f, 0.0f, 0.0f);
-    //}
-    
     // Calculate the lighting
     if (hit.distance < 1.#INF)
     {
         float3 lightDir = normalize(_PointLightPos.xyz - hit.position);
         float3 lightDistance = length(_PointLightPos.xyz - hit.position);
-        float3 normal = -hit.normal * 0.5 + 0.5;
+        float3 normal = -(hit.normal * 0.5) + 0.5;
         
         // diffuse
         float diffuse = max(dot(normal, lightDir), 0.0f);
@@ -306,15 +269,15 @@ float3 Shade(inout Ray ray, RayHit hit)
         return float3(0.0f, 0.0f, 0.0f);
     }
     
-    if (hit.distance < 1.#INF)
-    {
-        // add - cause the normal is in the wrong direction
-        return -hit.normal * 0.5 + 0.5;
-    }
-    else
-    {
-        return float3(0.0f, 0.0f, 0.0f);
-    }
+    //if (hit.distance < 1.#INF)
+    //{
+    //    // add - cause the normal is in the wrong direction
+    //    return -hit.normal * 0.5 + 0.5;
+    //}
+    //else
+    //{
+    //    return float3(0.0f, 0.0f, 0.0f);
+    //}
 }
 
 //-----------------------------------
@@ -327,25 +290,61 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     uint width, height;
     Result.GetDimensions(width, height);
     
+    float3 result = float3(0.0f, 0.0f, 0.0f);
+    
     // Transform pixel to UV coordinates
     float2 uv = float2((id.xy + _PixelOffset) / float2(width, height) * 2.0f - 1.0f);
     
     // Create a ray from the camera for the UVs
-    Ray ray = CreateCameraRay(uv);
+    //Ray ray = CreateCameraRay(uv);
+    
+    float3 rayColor = float3(1.0f, 1.0f, 1.0f);
+    float3 incomingLight = float3(0.0f, 0.0f, 0.0f);
+    
+    for (int i = 0; i < NUM_PER_PIXEL; i++)
+    {
+        Ray ray = CreateCameraRay(uv);
+
+        float3 throughput = float3(1, 1, 1);
+        
+        for (int depth = 0; depth < MAX_DEPTH; depth++)
+        {
+            RayHit hit = TraceRay(ray);
+            float3 color = Shade(ray, hit);
+            
+            result += throughput * color;
+            
+            throughput *= hit.albedo;
+            
+            float p = max(throughput.x, max(throughput.y, throughput.z));
+            if (rand() > p)
+            {
+                break;
+            }
+            
+            throughput *= 1.0f / p;
+        }
+    }
+    
+    result /= NUM_PER_PIXEL;
+    
+    result = result / (result + float3(1.0f, 1.0f, 1.0f));
+    
+    Result[id.xy] = float4(result, 1.0f);
     
     // Trace and shade
     //RayHit hit = TraceRay(ray);
     //Result[id.xy] = float4(Shade(ray, hit), 1.0f);
-    float3 result = float3(0.0f, 0.0f, 0.0f);
-    for (int i = 0; i < MAX_DEPTH; i++)
-    {
-        RayHit hit = TraceRay(ray);
-        result += ray.energy * Shade(ray, hit);
+    //float3 result = float3(0.0f, 0.0f, 0.0f);
+    //for (int i = 0; i < MAX_DEPTH; i++)
+    //{
+    //    RayHit hit = TraceRay(ray);
+    //    result += ray.energy * Shade(ray, hit);
         
-        if (!any(ray.energy))
-        {
-            break;
-        }
-    }
-    Result[id.xy] = float4(result, 1.0f);
+    //    if (!any(ray.energy))
+    //    {
+    //        break;
+    //    }
+    //}
+    //Result[id.xy] = float4(result, 1.0f);
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
@@ -29,7 +30,8 @@ public class RayTracingMaster : MonoBehaviour
     private Light _pointLight;
 
     // texture for ray tracing
-    //private List<Texture2D> _textures = new List<Texture2D>();
+    private List<Texture2D> _textures = new List<Texture2D>();
+    private Texture2DArray _Texture2DArray;
 
     // BVH variables
     private BVH.Node[] _bvhNodes;
@@ -62,6 +64,8 @@ public class RayTracingMaster : MonoBehaviour
         public Vector4 specular;
         public float smoothness;
         public Vector4 emission;
+        public int textureIndex;
+        public Vector4 textureST;
     }
     struct BvhNode
     {
@@ -99,6 +103,7 @@ public class RayTracingMaster : MonoBehaviour
         _MeshObjectBuffer?.Release();
         _VerticesBuffer?.Release();
         _IndicesBuffer?.Release();
+        //_TextureBuffer?.Release();
 
         // Release BVH
         _BvhNodesBuffer?.Release();
@@ -127,6 +132,13 @@ public class RayTracingMaster : MonoBehaviour
         SetComputeBuffer("_MeshObjectBuffer", _MeshObjectBuffer);
         SetComputeBuffer("_VerticesBuffer", _VerticesBuffer);
         SetComputeBuffer("_IndicesBuffer", _IndicesBuffer);
+
+        // set texture data to compute shader
+        RayTracingShader.SetTexture(0, "_Texture2DArray", _Texture2DArray);
+        RayTracingShader.SetInt("_TextureCount", _textures.Count);
+        RayTracingShader.SetInt("_MaxTextureWidth", _Texture2DArray.width);
+        RayTracingShader.SetInt("_MaxTextureHeight", _Texture2DArray.height);
+
     }
 
     public static void RegisterObject(RayTracingObject obj)
@@ -166,10 +178,10 @@ public class RayTracingMaster : MonoBehaviour
         _meshObjectsNeedRebuilding = false;
 
         // Clear any existing buffers
-        //_textures.Clear();
         _meshObjects.Clear();
         _vertices.Clear();
         _indices.Clear();
+        _textures.Clear();
 
         //for debug
         //int totalTriangleCount = 0;
@@ -210,33 +222,25 @@ public class RayTracingMaster : MonoBehaviour
                 Material material = materials[Mathf.Min(submesh, materials.Length - 1)];
 
                 // init setting Texture
-                //int albedoTexID = -1;
-                //int normalTexID = -1;
-                //bool hasAlbedoTex = false;
-                //bool hasNormalTex = false;
-
-                //// check if the material has a texture assigned
-                //if (material.HasProperty("_MainTex"))
-                //{
-                //    Texture2D albedoTexture = material.GetTexture("_MainTex") as Texture2D;
-                //    if (albedoTexture != null)
-                //    {
-                //        albedoTexID = _textures.Count;
-                //        _textures.Add(albedoTexture);
-                //        hasAlbedoTex = true;
-                //    }
-                //}
-
-                //if (material.HasProperty("_BumpMap"))
-                //{
-                //    Texture2D normalTexture = material.GetTexture("_BumpMap") as Texture2D;
-                //    if (normalTexture != null)
-                //    {
-                //        normalTexID = _textures.Count;
-                //        _textures.Add(normalTexture);
-                //        hasNormalTex = true;
-                //    }
-                //}
+                int albedoTexID = -1;
+                Vector4 textureST = new Vector4(1, 1, 0, 0);
+                
+                // check if the material has a texture assigned
+                if (material.HasProperty("_MainTex"))
+                {
+                    Texture2D albedoTexture = material.GetTexture("_MainTex") as Texture2D;
+                    if (albedoTexture != null)
+                    {
+                        albedoTexID = _textures.IndexOf(albedoTexture);
+                        if (albedoTexID == -1)
+                        {
+                            albedoTexID = _textures.Count;
+                            _textures.Add(albedoTexture);
+                        }
+                        //hasAlbedoTex = true;
+                        textureST = new Vector4(material.GetTextureScale("_MainTex").x, material.GetTextureScale("_MainTex").y, material.GetTextureOffset("_MainTex").x, material.GetTextureOffset("_MainTex").y);
+                    }
+                }
 
                 Vector3 albedo = material.GetVector("_Color");
                 Vector3 specular = material.GetVector("_SpecColor");
@@ -254,6 +258,8 @@ public class RayTracingMaster : MonoBehaviour
                     specular = specular,
                     smoothness = smoothness,
                     emission = emission,
+                    textureIndex = albedoTexID,
+                    textureST = textureST
                 });
             }
         }
@@ -267,12 +273,10 @@ public class RayTracingMaster : MonoBehaviour
         // for debug
         //Debug.Log("Triangle count: " + totalTriangleCount);
 
-        CreateComputeBuffer(ref _MeshObjectBuffer, _meshObjects, 124);
+        CreateComputeBuffer(ref _MeshObjectBuffer, _meshObjects, 144);
         CreateComputeBuffer(ref _VerticesBuffer, _vertices, 12);
         CreateComputeBuffer(ref _IndicesBuffer, _indices, 4);
-    
-        
-        
+
         // BVH
         BVH bvh = new BVH(allVertices.ToArray(), allTriangles.ToArray(), allNormals.ToArray());
 
@@ -281,7 +285,92 @@ public class RayTracingMaster : MonoBehaviour
 
         CreateComputeBuffer(ref _BvhNodesBuffer, _bvhNodes.ToList(), 32);
         CreateComputeBuffer(ref _BvhTriangleBuffer, allTris.ToList(), 72);
+
+        // Texture
+        if (_textures.Count > 0)
+        {
+            // Find the maximum dimensions among all textures
+            int maxWidth = _textures.Max(tex => tex.width);
+            int maxHeight = _textures.Max(tex => tex.height);
+
+            // Use a widely supported format
+            TextureFormat targetFormat = TextureFormat.RGBA32;
+
+            _Texture2DArray = new Texture2DArray(maxWidth, maxHeight, _textures.Count, targetFormat, true);
+
+            for (int i = 0; i < _textures.Count; i++)
+            {
+                Texture2D sourceTex = _textures[i];
+
+                // Ensure the texture is readable
+                if (!sourceTex.isReadable)
+                {
+                    Debug.LogWarning($"Texture {sourceTex.name} is not readable. Please enable 'Read/Write Enabled' in its import settings.");
+                    continue; // Skip this texture
+                }
+
+                // Create a new texture with the target format and size
+                Texture2D compatibleTex = new Texture2D(maxWidth, maxHeight, targetFormat, false);
+
+                // Resize and convert format if necessary
+                if (sourceTex.width != maxWidth || sourceTex.height != maxHeight || sourceTex.format != targetFormat)
+                {
+                    // Read pixels from source texture
+                    Color[] sourcePixels = sourceTex.GetPixels();
+
+                    // Resize the array if necessary
+                    if (sourceTex.width != maxWidth || sourceTex.height != maxHeight)
+                    {
+                        sourcePixels = ResizePixelArray(sourcePixels, sourceTex.width, sourceTex.height, maxWidth, maxHeight);
+                    }
+
+                    // Set pixels to the new texture
+                    compatibleTex.SetPixels(sourcePixels);
+                    compatibleTex.Apply();
+                }
+                else
+                {
+                    // If no resizing or format conversion is needed, just copy the pixels
+                    Graphics.CopyTexture(sourceTex, compatibleTex);
+                }
+
+                // Copy to the texture array
+                Graphics.CopyTexture(compatibleTex, 0, 0, _Texture2DArray, i, 0);
+
+                // Clean up the temporary texture
+                Destroy(compatibleTex);
+            }
+
+            _Texture2DArray.Apply(false, true);
+        }
+        else
+        {
+            _Texture2DArray = new Texture2DArray(1, 1, 1, TextureFormat.ARGB32, true);
+            _Texture2DArray.SetPixels(new Color[] { Color.white }, 0);
+            _Texture2DArray.Apply(false, true);
+        }
     }
+    private Color[] ResizePixelArray(Color[] sourcePixels, int sourceWidth, int sourceHeight, int targetWidth, int targetHeight)
+    {
+        Color[] resizedPixels = new Color[targetWidth * targetHeight];
+
+        for (int y = 0; y < targetHeight; y++)
+        {
+            for (int x = 0; x < targetWidth; x++)
+            {
+                float u = x / (float)targetWidth;
+                float v = y / (float)targetHeight;
+
+                int sourceX = Mathf.FloorToInt(u * sourceWidth);
+                int sourceY = Mathf.FloorToInt(v * sourceHeight);
+
+                resizedPixels[y * targetWidth + x] = sourcePixels[sourceY * sourceWidth + sourceX];
+            }
+        }
+
+        return resizedPixels;
+    }
+
 
     private static void CreateComputeBuffer<T>(ref ComputeBuffer buffer, List<T> data, int stride) where T : struct
     {
@@ -327,10 +416,10 @@ public class RayTracingMaster : MonoBehaviour
             _target.enableRandomWrite = true;
             _target.Create();
 
-            // convered for waht?
-            _converged = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-            _converged.enableRandomWrite = true;
-            _converged.Create();
+            //// convered for waht?
+            //_converged = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+            //_converged.enableRandomWrite = true;
+            //_converged.Create();
         }
     }
 
@@ -354,6 +443,7 @@ public class RayTracingMaster : MonoBehaviour
     {
         if (_shouldRender && !_isRenderComplete)
         {
+            Application.targetFrameRate = 60;
             RebuildMeshObjectBuffers();
             SetShaderParameters();
             InitRenderTexture();
