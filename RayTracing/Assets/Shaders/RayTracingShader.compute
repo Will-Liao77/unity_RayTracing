@@ -22,7 +22,7 @@ SamplerState sampler_TextureArray;
 Texture2DArray _Texture2DArray;
 
 static const float PI = 3.14159265f;
-static const float EPSILON = 1e-6;
+static const float EPSILON = 1e-8;
 
 //-----------------------------------
 // Utilty
@@ -122,6 +122,7 @@ struct MeshObject
 StructuredBuffer<MeshObject> _MeshObjectBuffer;
 StructuredBuffer<float3> _VerticesBuffer;
 StructuredBuffer<int> _IndicesBuffer;
+StructuredBuffer<float2> _TexCoordsBuffer;
 
 float3 SampleAlbedo(MeshObject meshObject, float2 uv)
 {
@@ -173,6 +174,7 @@ bool IntersectTriangle(Ray ray, float3 vert0, float3 vert1, float3 vert2,
         
     // calculate t, ray intersects triangle
     t = dot(edge2, qvec) * invDet;
+    
     return t > EPSILON;
 }
 
@@ -196,8 +198,13 @@ void IntersectMeshObject(Ray ray, inout RayHit bestHit, MeshObject meshObject)
                 bestHit.position = ray.origin + t * ray.direction;
                 bestHit.normal = normalize(cross(v1 - v0, v2 - v0));
                 //bestHit.normal = normalize(w * v0 + u * v1 + v * v2);
-                float w = 1.0f - u - v;
-                float2 uv = w * float2(0, 0) + u * float2(1, 0) + v * float2(0, 1);
+                float2 uv = u * float2(0, 0) + u * float2(1, 0) + v * float2(0, 1);
+
+                //float2 uv0 = _TexCoordsBuffer[_IndicesBuffer[i]].xy;
+                //float2 uv1 = _TexCoordsBuffer[_IndicesBuffer[i + 1]].xy;
+                //float2 uv2 = _TexCoordsBuffer[_IndicesBuffer[i + 2]].xy;
+                //float2 uv = uv0 + u * (uv1 - uv0) + v * (uv2 - uv0);
+                
                 bestHit.albedo = SampleAlbedo(meshObject, uv);
                 //bestHit.albedo = meshObject.albedo.xyz;
                 //bestHit.albedo = 1.0f;

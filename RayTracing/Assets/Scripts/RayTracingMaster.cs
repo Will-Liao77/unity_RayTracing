@@ -1,30 +1,36 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEditor;
-using UnityEditor.PackageManager;
 using UnityEngine;
-using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Rendering;
+using static Unity.VisualScripting.Member;
 
 public class RayTracingMaster : MonoBehaviour
 {
-    // public
+    #region public variables
     public ComputeShader RayTracingShader;
+    #endregion
 
-    // should render flag communicate with ObjFileBrowser.cs to check if the user has loaded a file
-    public bool _shouldRender = false;
-
+    #region private variables
     // private
+    // shader ID
+    int RayTracingKernalID;
     // Render texture
-    private RenderTexture _target;
-    private RenderTexture _converged;
+    private RenderTexture _computeShaderResult;
+    private RenderTexture _displayTexture;
+    private Material _displayMaterial;
+
+    // render
+    private GraphicsFence _graphicsFence;
 
     // camera
     private Camera _camera;
 
     // check render complete
-    private bool _isRenderComplete = false;
+    private bool _isRendering = false;
+    private bool _isAccumulating = false;
 
     // point light
     private Light _pointLight;
@@ -44,9 +50,11 @@ public class RayTracingMaster : MonoBehaviour
     private static List<MeshObject> _meshObjects = new List<MeshObject>();
     private static List<Vector3> _vertices = new List<Vector3>();
     private static List<int> _indices = new List<int>();
+    private static List<Vector2> _texCoords = new List<Vector2>();
     private ComputeBuffer _MeshObjectBuffer;
     private ComputeBuffer _VerticesBuffer;
     private ComputeBuffer _IndicesBuffer;
+    private ComputeBuffer _TexCoordsBuffer;
     private CommandBuffer _command;
 
     // mesh data
@@ -54,7 +62,9 @@ public class RayTracingMaster : MonoBehaviour
     private List<int> allTriangles = new List<int>();
     private List<Vector3> allNormals = new List<Vector3>();
 
-    // struct
+    #endregion
+
+    #region struct
     struct MeshObject
     {
         public Matrix4x4 localToWorldMatrix;
@@ -75,6 +85,7 @@ public class RayTracingMaster : MonoBehaviour
         public int rightChild;
         public int meshObjectIndex;
     }
+    #endregion
 
     private void Start()
     {
@@ -85,12 +96,15 @@ public class RayTracingMaster : MonoBehaviour
 
         _command = new CommandBuffer();
         _command.name = "Ray Tracing";
-
-        //Debug.Log(_shouldRender);
     }
     private void Awake()
     {
         _camera = GetComponent<Camera>();
+
+        Application.targetFrameRate = 60;
+
+        // RayTracingShaderKernalID
+        RayTracingKernalID = RayTracingShader.FindKernel("CSMain");
     }
 
     private void OnEnable()
@@ -103,7 +117,10 @@ public class RayTracingMaster : MonoBehaviour
         _MeshObjectBuffer?.Release();
         _VerticesBuffer?.Release();
         _IndicesBuffer?.Release();
-        //_TextureBuffer?.Release();
+        _TexCoordsBuffer?.Release();
+
+        // Release texture data
+        _computeShaderResult?.Release();
 
         // Release BVH
         _BvhNodesBuffer?.Release();
@@ -132,6 +149,7 @@ public class RayTracingMaster : MonoBehaviour
         SetComputeBuffer("_MeshObjectBuffer", _MeshObjectBuffer);
         SetComputeBuffer("_VerticesBuffer", _VerticesBuffer);
         SetComputeBuffer("_IndicesBuffer", _IndicesBuffer);
+        SetComputeBuffer("_TexCoordsBuffer", _TexCoordsBuffer);
 
         // set texture data to compute shader
         RayTracingShader.SetTexture(0, "_Texture2DArray", _Texture2DArray);
@@ -200,6 +218,16 @@ public class RayTracingMaster : MonoBehaviour
             // Get the object's material
             Material[] materials = meshRenderer.sharedMaterials;
 
+            // Add texCoords data
+            if (mesh.uv.Length > 0)
+            {
+                _texCoords.AddRange(mesh.uv);
+            }
+            else
+            {
+                _texCoords.AddRange(Enumerable.Repeat(new Vector2(0, 0), mesh.vertices.Length));
+            }
+
             for (int submesh = 0; submesh < mesh.subMeshCount; submesh++)
             {
                 // Add vertex data
@@ -224,7 +252,7 @@ public class RayTracingMaster : MonoBehaviour
                 // init setting Texture
                 int albedoTexID = -1;
                 Vector4 textureST = new Vector4(1, 1, 0, 0);
-                
+
                 // check if the material has a texture assigned
                 if (material.HasProperty("_MainTex"))
                 {
@@ -242,11 +270,12 @@ public class RayTracingMaster : MonoBehaviour
                     }
                 }
 
+                //Debug.Log("Texture ID: " + albedoTexID);
+
                 Vector3 albedo = material.GetVector("_Color");
                 Vector3 specular = material.GetVector("_SpecColor");
                 float smoothness = material.GetFloat("_Glossiness");
                 Vector3 emission = material.GetVector("_EmissionColor");
-
 
                 // Add the object to the list
                 _meshObjects.Add(new MeshObject()
@@ -276,6 +305,7 @@ public class RayTracingMaster : MonoBehaviour
         CreateComputeBuffer(ref _MeshObjectBuffer, _meshObjects, 144);
         CreateComputeBuffer(ref _VerticesBuffer, _vertices, 12);
         CreateComputeBuffer(ref _IndicesBuffer, _indices, 4);
+        CreateComputeBuffer(ref _TexCoordsBuffer, _texCoords, 8);
 
         // BVH
         BVH bvh = new BVH(allVertices.ToArray(), allTriangles.ToArray(), allNormals.ToArray());
@@ -297,6 +327,7 @@ public class RayTracingMaster : MonoBehaviour
             TextureFormat targetFormat = TextureFormat.RGBA32;
 
             _Texture2DArray = new Texture2DArray(maxWidth, maxHeight, _textures.Count, targetFormat, true);
+            _Texture2DArray.wrapMode = TextureWrapMode.Repeat;
 
             for (int i = 0; i < _textures.Count; i++)
             {
@@ -346,6 +377,7 @@ public class RayTracingMaster : MonoBehaviour
         else
         {
             _Texture2DArray = new Texture2DArray(1, 1, 1, TextureFormat.ARGB32, true);
+            _Texture2DArray.wrapMode = TextureWrapMode.Repeat;
             _Texture2DArray.SetPixels(new Color[] { Color.white }, 0);
             _Texture2DArray.Apply(false, true);
         }
@@ -370,7 +402,6 @@ public class RayTracingMaster : MonoBehaviour
 
         return resizedPixels;
     }
-
 
     private static void CreateComputeBuffer<T>(ref ComputeBuffer buffer, List<T> data, int stride) where T : struct
     {
@@ -403,64 +434,157 @@ public class RayTracingMaster : MonoBehaviour
 
     private void InitRenderTexture()
     {
-        if (_target == null || _target.width != Screen.width || _target.height != Screen.height)
+        if (_computeShaderResult == null || _computeShaderResult.width != Screen.width || _computeShaderResult.height != Screen.height)
         {
             // Release render texture if we already have one
-            if (_target != null)
+            if (_computeShaderResult != null)
             {
-                _target.Release();
+                _computeShaderResult.Release();
             }
 
             // Get a render target for Ray Tracing
-            _target = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-            _target.enableRandomWrite = true;
-            _target.Create();
-
-            //// convered for waht?
-            //_converged = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-            //_converged.enableRandomWrite = true;
-            //_converged.Create();
+            _computeShaderResult = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+            _computeShaderResult.enableRandomWrite = true;
+            _computeShaderResult.Create();
         }
+
+        _displayTexture = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.sRGB);
+        _displayTexture.enableRandomWrite = true;
+        _displayTexture.Create();
     }
 
     // vizualize BVH
-    void OnDrawGizmos()
+    //void OnDrawGizmos()
+    //{
+    //    if (_bvhNodes == null) return;
+
+    //    Gizmos.color = Color.green;
+
+    //    foreach (var node in _bvhNodes)
+    //    {
+    //        Vector3 center = (node._boundsMin + node._boundsMax) / 2;
+    //        Vector3 size = node._boundsMax - node._boundsMin;
+
+    //        Gizmos.DrawWireCube(center, size);
+    //    }
+    //}
+
+    private void CreateOrUpdateRenderTexture(ref RenderTexture rt)
     {
-        if (_bvhNodes == null) return;
-
-        Gizmos.color = Color.green;
-
-        foreach (var node in _bvhNodes)
+        if (rt == null || rt.width != Screen.width || rt.height != Screen.height)
         {
-            Vector3 center = (node._boundsMin + node._boundsMax) / 2;
-            Vector3 size = node._boundsMax - node._boundsMin;
+            if (rt != null)
+            {
+                rt.Release();
+            }
+            rt = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+            rt.enableRandomWrite = true;
+            rt.Create();
+        }
+    }
 
-            Gizmos.DrawWireCube(center, size);
+    private void PrepareToRender()
+    {
+        RebuildMeshObjectBuffers();
+        SetShaderParameters();
+        InitRenderTexture();
+    }
+    private void ValidateComputeShaderOutput()
+    {
+        RenderTexture.active = _computeShaderResult;
+        Texture2D tex = new Texture2D(_computeShaderResult.width, _computeShaderResult.height, TextureFormat.RGBAFloat, false);
+        tex.ReadPixels(new Rect(0, 0, _computeShaderResult.width, _computeShaderResult.height), 0, 0);
+        tex.Apply();
+
+        byte[] bytes = tex.EncodeToPNG();
+        string path = Application.dataPath + "/ComputeShaderOutput.png";
+        System.IO.File.WriteAllBytes(path, bytes);
+        Debug.Log("Compute shader output saved to: " + path);
+
+        Color centerColor = tex.GetPixel(tex.width / 2, tex.height / 2);
+        Debug.Log($"Center pixel color: {centerColor}");
+
+        Destroy(tex);
+    }
+
+    public void Render()
+    {
+        PrepareToRender();
+
+        RayTracingShader.SetTexture(RayTracingKernalID, "Result", _computeShaderResult);
+        int threadGroupsX = Mathf.CeilToInt(Screen.width / 8.0f);
+        int threadGroupsY = Mathf.CeilToInt(Screen.height / 8.0f);
+
+        _command = new CommandBuffer();
+        _command.SetExecutionFlags(CommandBufferExecutionFlags.AsyncCompute);
+
+        // graphicsFence
+        _graphicsFence = _command.CreateGraphicsFence(GraphicsFenceType.CPUSynchronisation, SynchronisationStageFlags.ComputeProcessing);
+
+        RayTracingShader.Dispatch(RayTracingKernalID, threadGroupsX, threadGroupsY, 1);
+
+        // save to png file check result
+        //ValidateComputeShaderOutput();
+
+        Graphics.ExecuteCommandBufferAsync(_command, ComputeQueueType.Default);
+
+        _isRendering = true;
+    }
+
+    //private void CheckGraphicsFenceSupport()
+    //{
+    //    if (SystemInfo.supportsGraphicsFence)
+    //    {
+    //        Debug.Log("Graphics fence is supported.");
+    //    }
+    //    else
+    //    {
+    //        Debug.Log("Graphics fence is not supported.");
+    //    }
+    //}
+
+    private bool _isRendered = false;
+
+    private void Update()
+    {
+        if (_isRendering)
+        {
+            if (_graphicsFence.passed)
+            {
+                Debug.Log("Rendering");
+                _isRendering = false;
+                _isAccumulating = true;
+
+                // if need to accumulate image use this
+                //_command = new CommandBuffer();
+                //_command.SetExecutionFlags(CommandBufferExecutionFlags.AsyncCompute);
+                //_graphicsFence = _command.CreateGraphicsFence(GraphicsFenceType.CPUSynchronisation, SynchronisationStageFlags.ComputeProcessing);
+
+                // use in accumulation shader
+                //RenderTexture temp = RenderTexture.GetTemporary(Screen.width, Screen.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+                //Graphics.Blit(_computeShaderResult, temp);
+
+                _isRendered = true;
+
+                // for accumulation
+                //Graphics.ExecuteCommandBufferAsync(_command, ComputeQueueType.Default);
+                //RenderTexture.ReleaseTemporary(temp);
+            }
+        }
+        else if (_isAccumulating)
+        {
+            if (_graphicsFence.passed)
+            {
+                Debug.Log("Accumulating");
+            }
         }
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        if (_shouldRender && !_isRenderComplete)
+        if (_isRendered)
         {
-            Application.targetFrameRate = 60;
-            RebuildMeshObjectBuffers();
-            SetShaderParameters();
-            InitRenderTexture();
-
-            // command buffer setting
-            _command.Clear();
-            _command.SetComputeTextureParam(RayTracingShader, 0, "Result", _target);
-            _command.DispatchCompute(RayTracingShader, 0, Mathf.CeilToInt(_target.width / 8.0f), Mathf.CeilToInt(_target.height / 8.0f), 1);
-            _command.Blit(_target, destination);
-            _command.Blit(destination, _converged);
-            Graphics.ExecuteCommandBuffer(_command);
-
-            _isRenderComplete = true;
-        }
-        else if (_isRenderComplete)
-        {
-            Graphics.Blit(destination, _converged);
+            Graphics.Blit(_computeShaderResult, destination);
         }
         else
         {

@@ -62,14 +62,14 @@ public class ObjFileBrowser : MonoBehaviour
             //Debug.Log("RayTracingMaster script added to " + obj.name);
         }
 
-        RayTracingMaster rayTracingMaster = FindObjectOfType<RayTracingMaster>();
-        if (rayTracingMaster != null)
-        {
-            rayTracingMaster._shouldRender = true;
-        }
-        else
-        {
-            Debug.LogError("RayTracingMaster not found in the scene.");
-        }
+        //RayTracingMaster rayTracingMaster = FindObjectOfType<RayTracingMaster>();
+        //if (rayTracingMaster != null)
+        //{
+        //    rayTracingMaster._shouldRender = true;
+        //}
+        //else
+        //{
+        //    Debug.LogError("RayTracingMaster not found in the scene.");
+        //}
     }
 }
