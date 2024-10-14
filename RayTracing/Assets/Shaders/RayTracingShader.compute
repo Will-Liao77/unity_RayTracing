@@ -18,7 +18,9 @@ float4 _PointLightProperties;
 int _TextureCount;
 int _MaxTextureHeight;
 int _MaxTextureWidth;
-SamplerState sampler_TextureArray;
+
+// name should be the same as the Texture2DArray in the shader
+SamplerState sampler__Texture2DArray;
 Texture2DArray _Texture2DArray;
 
 static const float PI = 3.14159265f;
@@ -128,9 +130,8 @@ float3 SampleAlbedo(MeshObject meshObject, float2 uv)
 {
     if (meshObject.textureIndex >= 0 && meshObject.textureIndex < _TextureCount)
     {
-        float2 scaledUV = uv * meshObject.textureST.xy + meshObject.textureST.zw;
-        //return _Texture2DArray.SampleLevel(sampler_TextureArray, float3(scaledUV, meshObject.textureIndex), 0).rgb;
-        return _Texture2DArray.Load(int4(scaledUV * float2(_MaxTextureWidth, _MaxTextureHeight), meshObject.textureIndex, 0)).rgb;
+        //float2 scaledUV = uv * meshObject.textureST.xy + meshObject.textureST.zw;
+        return meshObject.albedo.rgb * _Texture2DArray.SampleLevel(sampler__Texture2DArray, float3(uv, meshObject.textureIndex), 0).rgb;
     }else
     {
         return meshObject.albedo.rgb;    
@@ -206,8 +207,8 @@ void IntersectMeshObject(Ray ray, inout RayHit bestHit, MeshObject meshObject)
                 //float2 uv = uv0 + u * (uv1 - uv0) + v * (uv2 - uv0);
                 
                 bestHit.albedo = SampleAlbedo(meshObject, uv);
+                //bestHit.albedo = float3(uv, 0.0f);
                 //bestHit.albedo = meshObject.albedo.xyz;
-                //bestHit.albedo = 1.0f;
                 bestHit.specular = meshObject.specular.xyz;
                 bestHit.smoothness = meshObject.smoothness;
                 bestHit.emission = meshObject.emission.xyz;
@@ -268,6 +269,8 @@ float3 Shade(inout Ray ray, RayHit hit)
         float3 lightColor = (_PointLightProperties.x * _PointLightProperties.w) + (_PointLightProperties.y * _PointLightProperties.w) + (_PointLightProperties.z * _PointLightProperties.w);
         
         float3 color = ambient * (diffuseColor) * lightColor * attenuation + hit.emission;
+        
+        //float3 color = hit.albedo;
 
         return color;
     }

@@ -376,7 +376,7 @@ public class RayTracingMaster : MonoBehaviour
         }
         else
         {
-            _Texture2DArray = new Texture2DArray(1, 1, 1, TextureFormat.ARGB32, true);
+            _Texture2DArray = new Texture2DArray(512, 512, 3, TextureFormat.RGBA32, false);
             _Texture2DArray.wrapMode = TextureWrapMode.Repeat;
             _Texture2DArray.SetPixels(new Color[] { Color.white }, 0);
             _Texture2DArray.Apply(false, true);
@@ -571,13 +571,13 @@ public class RayTracingMaster : MonoBehaviour
                 //RenderTexture.ReleaseTemporary(temp);
             }
         }
-        else if (_isAccumulating)
-        {
-            if (_graphicsFence.passed)
-            {
-                Debug.Log("Accumulating");
-            }
-        }
+        //else if (_isAccumulating)
+        //{
+        //    if (_graphicsFence.passed)
+        //    {
+        //        Debug.Log("Accumulating");
+        //    }
+        //}
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
