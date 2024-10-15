@@ -218,22 +218,22 @@ public class RayTracingMaster : MonoBehaviour
             // Get the object's material
             Material[] materials = meshRenderer.sharedMaterials;
 
-            // Add texCoords data
-            if (mesh.uv.Length > 0)
-            {
-                _texCoords.AddRange(mesh.uv);
-            }
-            else
-            {
-                _texCoords.AddRange(Enumerable.Repeat(new Vector2(0, 0), mesh.vertices.Length));
-            }
-
             for (int submesh = 0; submesh < mesh.subMeshCount; submesh++)
             {
                 // Add vertex data
                 int firstVertex = _vertices.Count;
 
                 _vertices.AddRange(mesh.vertices);
+
+                // Add texCoords data
+                if (mesh.uv.Length > 0)
+                {
+                    _texCoords.AddRange(mesh.uv);
+                }
+                else
+                {
+                    _texCoords.AddRange(Enumerable.Repeat(new Vector2(0, 0), mesh.vertices.Length));
+                }
 
                 // get and add submesh index data
                 int[] submeshIndices = mesh.GetIndices(submesh);

@@ -1,30 +1,29 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\",
+  "WorkspaceRootPath": "C:\\storage\\unity_RayTracing\\RayTracing\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|e:\\ntust\\course\\unity\\unity_raytracing\\raytracing\\assets\\scripts\\raytracingmaster.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|C:\\storage\\unity_RayTracing\\RayTracing\\assets\\scripts\\raytracingmaster.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\raytracingmaster.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\assets\\shaders\\raytracingshader.compute||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "AbsoluteMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|c:\\storage\\unity_raytracing\\raytracing\\assets\\shaders\\raytracingshader.compute||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|solutionrelative:assets\\shaders\\raytracingshader.compute||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\assets\\scripts\\objfilebrowser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|C:\\storage\\unity_RayTracing\\RayTracing\\assets\\scripts\\objfilebrowser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\objfilebrowser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\assets\\scripts\\bvh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|C:\\storage\\unity_RayTracing\\RayTracing\\assets\\scripts\\bvh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\bvh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\assets\\scripts\\raytracingobject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|C:\\storage\\unity_RayTracing\\RayTracing\\assets\\scripts\\raytracingobject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{124F5BB2-8535-EF8C-89C7-37E6FF991877}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\raytracingobject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|e:\\ntust\\course\\unity\\unity_raytracing\\raytracing\\assets\\shaders\\texture.shader||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:assets\\shaders\\texture.shader||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\Assets\\Shaders\\Texture.shader||{3B902123-F8A7-4915-9F01-361F908088D0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -34,28 +33,14 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 7,
+          "SelectedChildIndex": 4,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:129:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 5,
               "Title": "Texture.shader",
               "DocumentMoniker": "E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\Assets\\Shaders\\Texture.shader",
-              "RelativeDocumentMoniker": "Assets\\Shaders\\Texture.shader",
               "ToolTip": "E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\Assets\\Shaders\\Texture.shader",
-              "RelativeToolTip": "Assets\\Shaders\\Texture.shader",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002777|",
               "WhenOpened": "2024-10-13T17:29:07.799Z"
@@ -64,9 +49,9 @@
               "$type": "Document",
               "DocumentIndex": 3,
               "Title": "BVH.cs",
-              "DocumentMoniker": "E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\BVH.cs",
+              "DocumentMoniker": "C:\\storage\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\BVH.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\BVH.cs",
-              "ToolTip": "E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\BVH.cs",
+              "ToolTip": "C:\\storage\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\BVH.cs",
               "RelativeToolTip": "Assets\\Scripts\\BVH.cs",
               "ViewState": "AgIAAIgAAAAAAAAAAAAUwHYAAABPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -76,9 +61,9 @@
               "$type": "Document",
               "DocumentIndex": 4,
               "Title": "RayTracingObject.cs",
-              "DocumentMoniker": "E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\RayTracingObject.cs",
+              "DocumentMoniker": "C:\\storage\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\RayTracingObject.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\RayTracingObject.cs",
-              "ToolTip": "E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\RayTracingObject.cs",
+              "ToolTip": "C:\\storage\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\RayTracingObject.cs",
               "RelativeToolTip": "Assets\\Scripts\\RayTracingObject.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -88,9 +73,9 @@
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "ObjFileBrowser.cs",
-              "DocumentMoniker": "E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\ObjFileBrowser.cs",
+              "DocumentMoniker": "C:\\storage\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\ObjFileBrowser.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\ObjFileBrowser.cs",
-              "ToolTip": "E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\ObjFileBrowser.cs",
+              "ToolTip": "C:\\storage\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\ObjFileBrowser.cs",
               "RelativeToolTip": "Assets\\Scripts\\ObjFileBrowser.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAxwD4AAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -100,11 +85,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "RayTracingMaster.cs",
-              "DocumentMoniker": "E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\RayTracingMaster.cs",
+              "DocumentMoniker": "C:\\storage\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\RayTracingMaster.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\RayTracingMaster.cs",
-              "ToolTip": "E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\RayTracingMaster.cs",
+              "ToolTip": "C:\\storage\\unity_RayTracing\\RayTracing\\Assets\\Scripts\\RayTracingMaster.cs",
               "RelativeToolTip": "Assets\\Scripts\\RayTracingMaster.cs",
-              "ViewState": "AgIAAPgAAAAAAAAAAAArwAgBAAA6AAAAAAAAAA==",
+              "ViewState": "AgIAAMQAAAAAAAAAAAAjwN8AAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-09-25T08:53:18.858Z",
               "EditorCaption": ""
@@ -113,11 +98,11 @@
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "RayTracingShader.compute",
-              "DocumentMoniker": "E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\Assets\\Shaders\\RayTracingShader.compute",
+              "DocumentMoniker": "C:\\storage\\unity_RayTracing\\RayTracing\\Assets\\Shaders\\RayTracingShader.compute",
               "RelativeDocumentMoniker": "Assets\\Shaders\\RayTracingShader.compute",
-              "ToolTip": "E:\\ntust\\course\\Unity\\unity_RayTracing\\RayTracing\\Assets\\Shaders\\RayTracingShader.compute",
+              "ToolTip": "C:\\storage\\unity_RayTracing\\RayTracing\\Assets\\Shaders\\RayTracingShader.compute",
               "RelativeToolTip": "Assets\\Shaders\\RayTracingShader.compute",
-              "ViewState": "AgIAALEAAAAAAAAAAAAiwMYAAABBAAAAAAAAAA==",
+              "ViewState": "AgIAAK0AAAAAAAAAAAAiwMsAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002777|",
               "WhenOpened": "2024-09-26T06:02:21.006Z",
               "EditorCaption": ""
