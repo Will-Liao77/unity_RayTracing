@@ -1,1 +1,1 @@
-C:\storage\unity_RayTracing\RayTracing
+E:\ntust\course\Unity\unity_RayTracing\RayTracing

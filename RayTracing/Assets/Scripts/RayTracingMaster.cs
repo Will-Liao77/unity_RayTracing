@@ -30,6 +30,7 @@ public class RayTracingMaster : MonoBehaviour
 
     // check render complete
     private bool _isRendering = false;
+    private bool _isRendered = false;
     private bool _isAccumulating = false;
 
     // point light
@@ -302,17 +303,18 @@ public class RayTracingMaster : MonoBehaviour
         // for debug
         //Debug.Log("Triangle count: " + totalTriangleCount);
 
-        CreateComputeBuffer(ref _MeshObjectBuffer, _meshObjects, 144);
-        CreateComputeBuffer(ref _VerticesBuffer, _vertices, 12);
-        CreateComputeBuffer(ref _IndicesBuffer, _indices, 4);
-        CreateComputeBuffer(ref _TexCoordsBuffer, _texCoords, 8);
-
         // BVH
         BVH bvh = new BVH(allVertices.ToArray(), allTriangles.ToArray(), allNormals.ToArray());
 
         _bvhNodes = bvh.GetNodes();
         Triangle[] allTris = bvh.GetTriangles();
 
+        // mesh info buffers
+        CreateComputeBuffer(ref _MeshObjectBuffer, _meshObjects, 144);
+        CreateComputeBuffer(ref _VerticesBuffer, _vertices, 12);
+        CreateComputeBuffer(ref _IndicesBuffer, _indices, 4);
+        CreateComputeBuffer(ref _TexCoordsBuffer, _texCoords, 8);
+        // BVH buffers
         CreateComputeBuffer(ref _BvhNodesBuffer, _bvhNodes.ToList(), 32);
         CreateComputeBuffer(ref _BvhTriangleBuffer, allTris.ToList(), 72);
 
@@ -543,8 +545,6 @@ public class RayTracingMaster : MonoBehaviour
     //    }
     //}
 
-    private bool _isRendered = false;
-
     private void Update()
     {
         if (_isRendering)
@@ -554,30 +554,9 @@ public class RayTracingMaster : MonoBehaviour
                 Debug.Log("Rendering");
                 _isRendering = false;
                 _isAccumulating = true;
-
-                // if need to accumulate image use this
-                //_command = new CommandBuffer();
-                //_command.SetExecutionFlags(CommandBufferExecutionFlags.AsyncCompute);
-                //_graphicsFence = _command.CreateGraphicsFence(GraphicsFenceType.CPUSynchronisation, SynchronisationStageFlags.ComputeProcessing);
-
-                // use in accumulation shader
-                //RenderTexture temp = RenderTexture.GetTemporary(Screen.width, Screen.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-                //Graphics.Blit(_computeShaderResult, temp);
-
                 _isRendered = true;
-
-                // for accumulation
-                //Graphics.ExecuteCommandBufferAsync(_command, ComputeQueueType.Default);
-                //RenderTexture.ReleaseTemporary(temp);
             }
         }
-        //else if (_isAccumulating)
-        //{
-        //    if (_graphicsFence.passed)
-        //    {
-        //        Debug.Log("Accumulating");
-        //    }
-        //}
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)

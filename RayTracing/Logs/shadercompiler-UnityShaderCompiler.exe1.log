@@ -1,97 +1,14 @@
-Base path: 'C:/Program Files/Unity/Hub/Editor/2022.3.9f1/Editor/Data', plugins path 'C:/Program Files/Unity/Hub/Editor/2022.3.9f1/Editor/Data/PlaybackEngines'
+Base path: 'D:/Unity Editor/2022.3.9f1/Editor/Data', plugins path 'D:/Unity Editor/2022.3.9f1/Editor/Data/PlaybackEngines'
 Cmd: initializeCompiler
 
 Cmd: compileComputeKernel
-  insize=10204 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=5264
+  insize=10535 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(272): implicit truncation of vector type
+ ok=1 outsize=6553
 
 Cmd: compileComputeKernel
-  insize=10265 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3565
-
-Cmd: compileComputeKernel
-  insize=10271 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3605
-
-Cmd: compileComputeKernel
-  insize=10277 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3645
-
-Cmd: compileComputeKernel
-  insize=10271 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3605
-
-Cmd: compileComputeKernel
-  insize=10266 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3565
-
-Cmd: compileComputeKernel
-  insize=10266 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3565
-
-Cmd: compileComputeKernel
-  insize=10259 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3797
-
-Cmd: compileComputeKernel
-  insize=10247 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3733
-
-Cmd: compileSnippet
-  insize=1683 file=Assets/DefaultResourcesExtra/Standard (Specular setup) pass=FORWARD ppOnly=0 stripLineD=0 buildPlatform=19 rsLen=0 pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR UNITY_PASS_FORWARDBASE uKW=_NORMALMAP DIRECTIONAL LIGHTPROBE_SH VERTEXLIGHT_ON dKW=FOG_LINEAR FOG_EXP FOG_EXP2 INSTANCING_ON _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON _SPECGLOSSMAP _PARALLAXMAP SHADOWS_SHADOWMASK DYNAMICLIGHTMAP_ON LIGHTMAP_ON LIGHTMAP_SHADOW_MIXING DIRLIGHTMAP_COMBINED SHADOWS_SCREEN UNITY_NO_DXT5nm UNITY_FRAMEBUFFER_FETCH_AVAILABLE UNITY_METAL_SHADOWS_USE_POINT_FILTERING UNITY_NO_SCREENSPACE_SHADOWS UNITY_PBS_USE_BRDF2 UNITY_PBS_USE_BRDF3 UNITY_NO_FULL_STANDARD_SHADER UNITY_HARDWARE_TIER1 UNITY_HARDWARE_TIER2 UNITY_HARDWARE_TIER3 UNITY_COLORSPACE_GAMMA UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS UNITY_LIGHTMAP_DLDR_ENCODING UNITY_LIGHTMAP_RGBM_ENCODING UNITY_VIRTUAL_TEXTURING UNITY_PRETRANSFORM_TO_DISPLAY_ORIENTATION UNITY_ASTC_NORMALMAP_ENCODING SHADER_API_GLES30 UNITY_UNIFIED_SHADER_PRECISION_MODEL flags=0 lang=0 type=Vertex platform=d3d11 reqs=227 mask=6 start=67 ok=1 outsize=3022
-
-Cmd: compileComputeKernel
-  insize=10253 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3773
-
-Cmd: compileComputeKernel
-  insize=10256 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=3613
-
-Cmd: compileComputeKernel
-  insize=10229 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=5432
-
-Cmd: compileComputeKernel
-  insize=10229 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=5432
-
-Cmd: compileComputeKernel
-  insize=10241 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(265): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(314): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(320): loop only executes for 1 iteration(s), forcing loop to unroll
- ok=1 outsize=5496
-
-Cmd: compileComputeKernel
-  insize=10155 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(264): implicit truncation of vector type
-  error: 1 plat 4 at RayTracingShader.compute(313): loop only executes for 1 iteration(s), forcing loop to unroll
-  error: 1 plat 4 at RayTracingShader.compute(319): loop only executes for 1 iteration(s), forcing loop to unroll
+  insize=10535 file=Assets/Shaders/RayTracingShader.compute kernel=CSMain ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202239> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 reqs=16385 forceDXC=0 forceFXC=0  error: 1 plat 4 at RayTracingShader.compute(272): implicit truncation of vector type
+  error: 1 plat 4 at RayTracingShader.compute(322): loop only executes for 1 iteration(s), forcing loop to unroll
+  error: 1 plat 4 at RayTracingShader.compute(328): loop only executes for 1 iteration(s), forcing loop to unroll
  ok=1 outsize=5496
 
 Cmd: shutdown
